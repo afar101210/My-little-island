@@ -3,13 +3,14 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Nunito:wght@500;700;800&display=swap">
 <style>
-/* Layout: one-column phone game on an ocean ground; chunky toy-brick buttons, cards and a side-view 10×8 island board with gravity. Single bright look by choice. */
+/* Layout: one-column phone game on an ocean ground; chunky toy-brick buttons, flip cards and a scrollable side-view 16×10 island with gravity, water and power. Single bright look by choice. */
 :root{
-  --sea:#1b8bb4; --sea-deep:#0d5f80; --sky:#cdeefe; --sky-top:#9fdcfb; --river:#3fa9dc; --bed:#d9bb7b;
-  --grass:#74c450; --dirt:#9a6a3f; --dirt-dark:#7a4f2c;
+  --sea:#1b8bb4; --sea-deep:#0d5f80; --sky:#cdeefe; --sky-top:#9fdcfb; --river:#3fa9dc; --bed:#c9a86a; --sand:#efd59a;
+  --grass:#74c450; --dirt:#9a6a3f;
   --paper:#fffaf0; --ink:#1d2433; --muted:#5b6475;
   --red:#e3342f; --red-dark:#a91f1b; --yellow:#ffcd1f; --yellow-dark:#c79a00;
   --green:#2e9e44; --green-dark:#1f6e2f; --white:#ffffff; --white-dark:#c9d3dc;
+  --tile:34px;
   --font-display:'Lilita One','Arial Rounded MT Bold','Trebuchet MS',sans-serif;
   --font-body:'Nunito','Segoe UI',Roboto,system-ui,sans-serif;
   color-scheme:light;
@@ -23,7 +24,7 @@ body{margin:0;color:var(--ink);font-family:var(--font-body);font-size:16px;line-
   background-size:38px 38px,54px 54px;-webkit-tap-highlight-color:transparent}
 button{font:inherit;color:inherit;cursor:pointer}
 button:focus-visible,summary:focus-visible{outline:3px solid var(--yellow);outline-offset:3px}
-#app{max-width:480px;margin:0 auto;padding-inline:16px;padding-block:16px 40px}
+#app{max-width:520px;margin:0 auto;padding-inline:16px;padding-block:16px 40px}
 .screen{display:flex;flex-direction:column;gap:16px}
 h1,h2,h3{font-family:var(--font-display);font-weight:400;margin:0;text-wrap:balance;letter-spacing:.01em}
 p{margin:0}
@@ -34,7 +35,7 @@ p{margin:0}
 .hero svg{width:100%;max-width:300px;height:auto}
 .logo{color:var(--white);font-size:26px;line-height:1;text-shadow:0 3px 0 var(--sea-deep)}
 .logo span{display:block;font-size:64px;color:var(--yellow);text-shadow:0 4px 0 var(--ink);-webkit-text-stroke:2px var(--ink)}
-.tag{color:var(--white);max-width:34ch;font-weight:700}
+.tag{color:var(--white);max-width:36ch;font-weight:700}
 .menu{display:flex;flex-direction:column;gap:14px}
 
 .btn{border:0;border-radius:14px;padding:14px 18px;font-family:var(--font-display);font-size:21px;letter-spacing:.02em;
@@ -59,7 +60,6 @@ p{margin:0}
 .rules li{display:grid;grid-template-columns:34px 1fr;gap:10px;align-items:start}
 .rules .ri{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;font-size:18px;background:var(--sky)}
 .rules b,.steps b{font-weight:800}
-.stock-note{font-size:14px;color:var(--muted);font-weight:700}
 
 /* Decks */
 .decks{display:grid;grid-template-columns:1fr 1fr;gap:14px}
@@ -67,7 +67,7 @@ p{margin:0}
 .deck::before,.deck::after{content:"";position:absolute;inset:6px -2px 2px 4px;border-radius:16px;background:var(--pile);z-index:0}
 .deck::after{inset:3px 1px 6px 2px;opacity:.85}
 .deck[data-kind="problem"]{--pile:var(--red-dark)}
-.deck[data-kind="budget"]{--pile:var(--yellow-dark)}
+.deck[data-kind="cond"]{--pile:var(--yellow-dark)}
 .card{position:relative;z-index:1;display:block;aspect-ratio:3/4.2;transform-style:preserve-3d;transition:transform .6s cubic-bezier(.3,1.4,.5,1)}
 .deck.flipped .card{transform:rotateY(180deg)}
 .face{position:absolute;inset:0;border-radius:16px;backface-visibility:hidden;-webkit-backface-visibility:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:12px;text-align:center;overflow:hidden}
@@ -77,25 +77,23 @@ p{margin:0}
 .face.back.b{background-color:var(--yellow);color:var(--ink)}
 .face.back small{font-family:var(--font-body);font-weight:800;font-size:12px;letter-spacing:.02em}
 .face.front{transform:rotateY(180deg);background:var(--paper);border:4px solid var(--edge,var(--red))}
-.deck[data-kind="budget"] .face.front{--edge:var(--yellow)}
+.deck[data-kind="cond"] .face.front{--edge:var(--yellow)}
 .field{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;background:var(--ink);color:var(--white);border-radius:99px;padding:3px 9px}
 .big{font-size:40px;line-height:1.1}
 .face strong{font-family:var(--font-display);font-weight:400;font-size:19px;line-height:1.1}
 .story{font-size:13px;line-height:1.3;color:var(--muted);font-weight:700}
-.coin{width:74px;height:74px;border-radius:50%;background:var(--yellow);border:5px solid var(--yellow-dark);display:grid;place-items:center;font-family:var(--font-display);font-size:32px;box-shadow:inset 0 -5px 0 rgba(0,0,0,.12)}
 
 /* Build */
-.hud{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;display:flex;gap:8px;padding-block:8px;margin-inline:-16px;padding-inline:16px;background:var(--sea)}
-.pill{background:var(--paper);border:0;border-radius:99px;padding:8px 14px;font-weight:800;font-size:17px;display:flex;align-items:center;gap:6px;box-shadow:0 4px 0 rgba(0,0,0,.18);font-variant-numeric:tabular-nums}
-.pill small{font-weight:700;color:var(--muted);font-size:13px}
+.hud{position:sticky;top:env(safe-area-inset-top,0px);z-index:6;display:flex;gap:8px;padding-block:8px;margin-inline:-16px;padding-inline:16px;background:var(--sea)}
+.pill{background:var(--paper);border:0;border-radius:99px;padding:8px 12px;font-weight:800;font-size:16px;display:flex;align-items:center;gap:6px;box-shadow:0 4px 0 rgba(0,0,0,.18);font-variant-numeric:tabular-nums;white-space:nowrap}
+.pill small{font-weight:700;color:var(--muted);font-size:12px}
 .pill.timer{margin-left:auto}
 .pill.low{background:var(--red);color:var(--white)}
-.shake{animation:shake .35s}
-@keyframes shake{25%{transform:translateX(-6px)}50%{transform:translateX(6px)}75%{transform:translateX(-3px)}}
 .mission{gap:8px}
 .mission .row{display:flex;gap:10px;align-items:center}
 .mission .big{font-size:30px}
 .mission h3{font-size:20px;line-height:1.1}
+.condchip{display:flex;gap:8px;align-items:flex-start;background:#fff3c4;border-radius:12px;padding:8px 10px;font-size:14px;font-weight:700}
 details{border-top:2px dashed var(--white-dark);padding-top:8px}
 summary{font-weight:800;cursor:pointer;color:var(--sea-deep)}
 details p,details ul{margin-top:6px;font-size:14px;font-weight:700;color:var(--muted)}
@@ -108,47 +106,64 @@ details ul{padding-left:18px;display:flex;flex-direction:column;gap:4px}
 .checklist li.no{color:var(--red-dark)}
 .checklist li.no::before{border-color:var(--red)}
 
-.board{border-radius:18px;padding:6px;background:linear-gradient(var(--sky-top),var(--sky));box-shadow:0 6px 0 rgba(0,0,0,.18);position:relative}
-.grid{display:grid;grid-template-columns:repeat(10,1fr);grid-template-rows:repeat(8,1fr);aspect-ratio:10/8;max-width:100%}
+.board-scroll{overflow-x:auto;margin-inline:-16px;padding-inline:16px;scrollbar-width:thin}
+.board{width:max-content;border-radius:18px;padding:6px;background:linear-gradient(var(--sky-top),var(--sky));box-shadow:0 6px 0 rgba(0,0,0,.18);position:relative}
+.grid{display:grid;grid-template-columns:repeat(16,var(--tile));grid-template-rows:repeat(10,var(--tile));position:relative}
+.scrollhint{color:var(--white);font-size:13px;font-weight:700;text-align:center;margin-top:-8px}
 .tile{border:0;padding:0;background:transparent;position:relative;min-width:0;min-height:0;display:flex;align-items:flex-end;justify-content:center}
-.tile.a{border-radius:4px}
 .tile.t{background:var(--dirt);background-image:radial-gradient(circle,rgba(0,0,0,.12) 0 1.5px,transparent 2px);background-size:9px 9px;cursor:default}
-.tile.t.top{box-shadow:inset 0 5px 0 var(--grass)}
+.tile.s{background:var(--sand);background-image:radial-gradient(circle,rgba(0,0,0,.1) 0 1px,transparent 1.5px);background-size:6px 6px;cursor:default}
+.tile.top.t{box-shadow:inset 0 5px 0 var(--grass)}
 .tile.l{background:var(--bed);cursor:default}
 .tile.w{background:var(--river);background-image:repeating-linear-gradient(170deg,rgba(255,255,255,.22) 0 2px,transparent 2px 9px)}
 .tile.hint-ok::after{content:"";position:absolute;inset:3px;border:2px dashed rgba(29,36,51,.45);border-radius:5px;pointer-events:none}
 .tile.w.hint-ok::after{border-color:rgba(255,255,255,.9)}
 .sun{position:absolute;top:10px;right:14px;width:26px;height:26px;border-radius:50%;background:var(--yellow);box-shadow:0 0 0 6px rgba(255,205,31,.3);pointer-events:none}
+.flood{position:absolute;left:0;right:0;bottom:0;pointer-events:none;border-top:3px dashed var(--sea-deep);background:rgba(63,169,220,.16);z-index:2;transform-origin:bottom}
+.flood span{position:absolute;left:6px;top:-22px;font-size:11px;font-weight:800;color:var(--white);background:var(--sea-deep);border-radius:6px;padding:1px 6px}
+.flood.rising{background:rgba(30,120,190,.55);animation:rise 1s ease-out}
+@keyframes rise{from{transform:scaleY(.2)}}
+.walker{position:absolute;width:var(--tile);height:var(--tile);display:grid;place-items:center;font-size:24px;z-index:4;transition:left .25s linear,top .25s linear;pointer-events:none;filter:drop-shadow(0 2px 0 rgba(0,0,0,.25))}
 
 .brick{--c:var(--red);position:relative;display:grid;place-items:center;width:84%;height:62%;margin-top:14%;border-radius:4px;background:var(--c);
   box-shadow:inset 0 -4px 0 rgba(0,0,0,.25),inset 0 2px 0 rgba(255,255,255,.35)}
 .brick::before,.brick::after{content:"";position:absolute;top:-22%;width:26%;aspect-ratio:1/.7;border-radius:40%;background:var(--c);box-shadow:inset 0 -2px 0 rgba(0,0,0,.25),inset 0 1px 0 rgba(255,255,255,.4)}
 .brick::before{left:14%}.brick::after{right:14%}
-.brick .ico{font-size:clamp(11px,3.6vw,19px);line-height:1;filter:drop-shadow(0 1px 0 rgba(0,0,0,.25))}
+.brick .ico{font-size:18px;line-height:1;filter:drop-shadow(0 1px 0 rgba(0,0,0,.25))}
 .tile .brick{width:100%;height:80%;margin:0;border-radius:3px;animation:drop .2s ease-out}
 .tile .brick::before,.tile .brick::after{top:-18%;height:20%;width:28%;aspect-ratio:auto}
+.tile .brick.thin{height:45%;align-self:flex-start;margin:0}
+.tile .brick.thin::before,.tile .brick.thin::after{display:none}
+.tile .brick.cable{width:40%;height:100%;border-radius:2px;background:repeating-linear-gradient(var(--c) 0 6px,#e0a800 6px 8px)}
+.tile .brick.cable::before,.tile .brick.cable::after{display:none}
+.tile .brick.cable .ico{font-size:12px}
+.tile .brick.fixed{outline:2px dashed rgba(29,36,51,.5);outline-offset:-3px}
+.tile .brick.on{box-shadow:inset 0 -4px 0 rgba(0,0,0,.25),0 0 10px 3px rgba(255,214,0,.85)}
 @keyframes drop{from{transform:translateY(-35%);opacity:.4}}
 .tile .brick.falling{animation:fall .9s ease-in forwards;z-index:3}
 @keyframes fall{to{transform:translateY(260%) rotate(35deg);opacity:0}}
-.tile .brick.wobble{animation:wobble .5s 2}
+.tile .brick.wobble{animation:wobble .45s 2}
 @keyframes wobble{25%{transform:rotate(-6deg)}75%{transform:rotate(6deg)}}
 
+.tools{display:flex;gap:10px}
+.tools .btn{flex:1}
 .palette-wrap{overflow-x:auto;margin-inline:-16px;padding-inline:16px;scrollbar-width:thin}
-.palette{display:flex;gap:10px;padding-block:8px 10px;width:max-content}
+.palette{display:flex;gap:10px;padding-block:10px;width:max-content}
 .chip{border:0;background:var(--paper);border-radius:14px;padding:8px 8px 6px;display:flex;flex-direction:column;align-items:center;gap:2px;width:80px;box-shadow:0 4px 0 rgba(0,0,0,.2);transition:transform .1s;position:relative}
 .chip .brick{width:46px;height:28px;margin-top:8px}
 .chip .name{font-size:12px;font-weight:800;line-height:1.1}
-.chip .price{font-size:13px;font-weight:800;color:var(--yellow-dark);font-variant-numeric:tabular-nums}
 .chip .where{font-size:10px;font-weight:700;color:var(--muted);line-height:1.1}
 .chip .stock{position:absolute;top:-6px;right:-4px;background:var(--ink);color:var(--white);font-size:11px;font-weight:800;border-radius:99px;padding:1px 7px;font-variant-numeric:tabular-nums}
 .chip.sel{transform:translateY(-4px);outline:4px solid var(--yellow)}
 .chip.cant{opacity:.4}
 .tip{color:var(--white);font-weight:700;min-height:2.9em;text-align:center}
-.btn.ready{animation:pulse 1.2s infinite}
-@keyframes pulse{50%{transform:scale(1.04)}}
 .report{border:4px solid var(--red)}
 .report.good{border-color:var(--green)}
-.report ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:6px;font-weight:700;font-size:15px}
+.report.run{border-color:var(--yellow)}
+.report ul{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:8px;font-weight:700;font-size:15px}
+.report li{display:grid;grid-template-columns:28px 1fr;gap:8px;align-items:start}
+.report li .st{font-size:20px;line-height:1.2}
+.report li small{display:block;font-size:13px;color:var(--muted)}
 
 /* Result */
 .result{text-align:center;align-items:center}
@@ -171,18 +186,6 @@ details ul{padding-left:18px;display:flex;flex-direction:column;gap:4px}
 @keyframes rain{to{transform:translateY(110vh) rotate(540deg)}}
 
 /* Real Lego mode */
-.prices{display:flex;flex-direction:column;gap:8px}
-.price-row{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center}
-.price-row .brick{width:40px;height:24px;margin-top:6px}
-.price-row .txt{min-width:0}
-.price-row .txt b{display:block;font-size:15px}
-.price-row .txt span{font-size:12px;color:var(--muted);font-weight:700}
-.stepper{display:flex;align-items:center;gap:6px;font-variant-numeric:tabular-nums}
-.stepper button{width:36px;height:36px;border-radius:10px;border:0;background:var(--ink);color:var(--white);font-size:20px;font-weight:800}
-.stepper output{min-width:24px;text-align:center;font-weight:800}
-.pricetag{font-size:12px;font-weight:800;color:var(--yellow-dark);white-space:nowrap}
-.total{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;border-top:3px dashed var(--white-dark);padding-top:10px;font-weight:800;font-variant-numeric:tabular-nums}
-.total .over{color:var(--red)}
 .bigtimer{font-family:var(--font-display);font-size:64px;text-align:center;line-height:1;font-variant-numeric:tabular-nums}
 .bigtimer.low{color:var(--red)}
 .rowbtns{display:flex;gap:10px;flex-wrap:wrap}
@@ -220,7 +223,7 @@ details ul{padding-left:18px;display:flex;flex-direction:column;gap:4px}
       <path d="M20 128 q10 -6 20 0 t20 0 M180 132 q10 -6 20 0 t20 0" stroke="#fff" stroke-opacity=".5" stroke-width="3" fill="none" stroke-linecap="round"/>
     </svg>
     <h1 class="logo">My Little<span>Island</span></h1>
-    <p class="tag">La isla tiene un problema y tu equipo es el de ingeniería. Construyan una solución que aguante la prueba, con el dinero y las piezas que hay.</p>
+    <p class="tag">La isla tiene un problema y ustedes son el equipo de ingeniería. Construyan una solución que aguante el peso, el viento y el agua, con las piezas que hay en la bodega.</p>
   </div>
   <div class="menu">
     <button class="btn" data-go="draw" id="btn-play">Jugar en la pantalla</button>
@@ -235,51 +238,52 @@ details ul{padding-left:18px;display:flex;flex-direction:column;gap:4px}
 
   <div class="panel">
     <h3>El reto</h3>
-    <p>La isla tiene un problema y ustedes son el equipo de ingeniería. Tienen que construir una solución que <b>funcione de verdad</b>: que no se caiga, que cumpla la misión y que no gaste más dinero del que hay.</p>
+    <p>La isla tiene un problema y ustedes son el equipo de ingeniería. Deben construir una solución que <b>funcione de verdad</b>: que se sostenga, que aguante el clima y que cumpla la misión, usando solo las piezas de la bodega.</p>
   </div>
 
   <div class="panel">
     <h3>Cómo se juega</h3>
     <ol class="steps">
-      <li><b>Saquen una carta de problema.</b> Dice qué necesita la isla y qué tipo de ingeniería lo resuelve.</li>
-      <li><b>Saquen una carta de presupuesto.</b> Son las monedas que pueden gastar. Cada bloque cuesta distinto.</li>
-      <li><b>Planeen antes de construir.</b> Lean la misión, miren cuántas piezas hay en la bodega y piensen cuánto va a costar.</li>
-      <li><b>Construyan.</b> Elijan un bloque abajo y tóquenlo en la isla. Tienen 5 minutos.</li>
-      <li><b>Toquen “Probar”.</b> Pasa un camión, sopla el viento y llueve. Lo que esté mal construido se cae.</li>
-      <li><b>Si algo falla, mejórenlo y prueben otra vez</b> mientras quede tiempo. Así trabajan los ingenieros: diseñar, probar y mejorar.</li>
+      <li><b>Saquen una carta de problema.</b> Dice qué necesita la isla y qué ingeniería lo resuelve.</li>
+      <li><b>Saquen una carta de condición.</b> Cambia las reglas: viento fuerte, lluvia, camión pesado, terreno blando o poco tiempo.</li>
+      <li><b>Exploren el mapa.</b> Deslícenlo de lado a lado: hay mar, playa de arena, un río profundo y una colina.</li>
+      <li><b>Planeen y construyan.</b> Elijan una pieza abajo y tóquenla en el mapa. Los cuadros punteados muestran dónde cabe. El botón <b>Deshacer</b> quita la última jugada.</li>
+      <li><b>Toquen “Probar”.</b> La prueba tiene etapas: pasa el camión, sopla el viento, sube el agua y, si hace falta, una persona camina por lo que construyeron.</li>
+      <li><b>Si algo falla, mejoren y prueben otra vez</b> mientras quede tiempo. Así trabajan los ingenieros: diseñar, probar y mejorar.</li>
     </ol>
   </div>
 
   <div class="panel">
     <h3>Reglas de construcción</h3>
     <ul class="rules">
-      <li><span class="ri">⬇️</span><span><b>Nada flota.</b> Cada bloque va encima del suelo o encima de otro bloque.</span></li>
-      <li><span class="ri">🌳</span><span><b>Árbol, reciclaje y columpio</b> van directo en el suelo.</span></li>
-      <li><span class="ri">💧</span><span><b>Pilar, filtro y sensor</b> van dentro del agua del río.</span></li>
-      <li><span class="ri">🌉</span><span><b>Las vigas</b> se pueden pegar al lado de otro bloque, pero si quedan <b>más de 2 vigas seguidas sin nada abajo</b>, se caen. Usen un pilar.</span></li>
-      <li><span class="ri">💨</span><span><b>Torres delgadas:</b> una columna de 4 bloques o más se cae con el viento si no tiene otro bloque pegado en la base.</span></li>
-      <li><span class="ri">📦</span><span><b>La bodega tiene piezas limitadas.</b> El número negro en cada bloque dice cuántas quedan.</span></li>
-      <li><span class="ri">✋</span><span><b>Para quitar un bloque</b>, primero quiten lo que tiene encima. Si lo quitan antes de probar, les devuelven las monedas.</span></li>
-      <li><span class="ri">💥</span><span><b>Lo que se cae en la prueba</b> vuelve a la bodega, pero <b>solo les devuelven la mitad</b> de lo que costó. ¡Construir mal sale caro!</span></li>
+      <li><span class="ri">⬇️</span><span><b>Nada flota.</b> Cada pieza se apoya en el suelo o encima de otra pieza firme. Encima de paneles, antenas, árboles y cables no se puede construir.</span></li>
+      <li><span class="ri">🏖️</span><span><b>La arena es blanda.</b> Lo pesado (ladrillo, ventana, techo, viga, computador, antena) se hunde si no tiene un <b>cimiento</b> debajo.</span></li>
+      <li><span class="ri">🏛️</span><span><b>Pilares:</b> se apoyan en el fondo del río o en el suelo, y se pueden apilar. Son los únicos, junto con el filtro y el sensor, que van dentro del agua.</span></li>
+      <li><span class="ri">➖</span><span><b>Vigas:</b> se pegan al lado de la orilla o de otra pieza. Pueden tener máximo <b>2 casillas seguidas sin nada abajo</b> entre apoyos, y sobresalir solo 1 casilla en la punta.</span></li>
+      <li><span class="ri">💨</span><span><b>Viento:</b> una columna de 4 piezas o más se cae si ninguna de sus piezas está pegada de lado a otra pieza o a la tierra.</span></li>
+      <li><span class="ri">🌊</span><span><b>Agua:</b> lo que quede por debajo de la línea azul se moja. Cables, paneles, computadores, antenas, ventanas y techos se dañan con el agua.</span></li>
+      <li><span class="ri">⚡</span><span><b>Energía y datos:</b> viajan por piezas que se tocan de lado o arriba y abajo: cables, paneles, computadores, antenas y edificios. Un panel solo funciona si le da el sol (nada encima). Lo que tiene energía brilla.</span></li>
+      <li><span class="ri">🧒</span><span><b>Caminar:</b> una persona sube máximo 1 casilla a la vez y baja máximo 2. No camina por el agua.</span></li>
+      <li><span class="ri">📦</span><span><b>La bodega tiene piezas limitadas</b>: el número negro dice cuántas quedan. Lo que se cae en la prueba vuelve a la bodega.</span></li>
     </ul>
   </div>
 
   <div class="panel">
     <h3>Estrellas</h3>
     <ul class="rules">
-      <li><span class="ri">⭐</span><span><b>Problema resuelto:</b> cumplieron toda la misión y nada importante se cayó.</span></li>
+      <li><span class="ri">⭐</span><span><b>Problema resuelto:</b> cumplieron toda la misión después de la prueba.</span></li>
       <li><span class="ri">⭐</span><span><b>A la primera:</b> funcionó en la primera prueba.</span></li>
-      <li><span class="ri">⭐</span><span><b>Ahorro:</b> les sobraron al menos 2 monedas.</span></li>
+      <li><span class="ri">⭐</span><span><b>Diseño eficiente:</b> usaron igual o menos piezas que la meta.</span></li>
     </ul>
   </div>
 
   <div class="panel">
     <h3>Con Legos de verdad</h3>
     <ol class="steps">
-      <li>Saquen las dos cartas en la app. La app les dice <b>qué construir</b> y cuál será <b>la prueba</b>.</li>
-      <li>Una persona del equipo es <b>la tesorera</b>: cada vez que usan una pieza, la suma con los botones <b>+</b> de la lista de precios.</li>
-      <li>Inicien el reloj de 5 minutos y construyan sobre la mesa.</li>
-      <li>Al terminar, hagan la prueba de verdad (poner peso, soplar…). Si se cae, ¡a mejorar!</li>
+      <li>Saquen las dos cartas en la app. La app les dice <b>qué construir</b>, <b>la condición</b> y cuál será <b>la prueba</b>.</li>
+      <li>Usen libros como colinas y una hoja azul como río o mar.</li>
+      <li>Inicien el reloj y construyan sobre la mesa.</li>
+      <li>Al terminar, hagan la prueba de verdad. Si algo se cae, ¡a mejorar!</li>
     </ol>
   </div>
 </section>
@@ -303,8 +307,8 @@ details ul{padding-left:18px;display:flex;flex-direction:column;gap:4px}
     <button class="deck" data-kind="problem" id="deck-p" aria-label="Voltear carta de problema">
       <span class="card"><span class="face back p">PROBLEMA<small>¿Qué necesita la isla?</small></span><span class="face front" id="front-p"></span></span>
     </button>
-    <button class="deck" data-kind="budget" id="deck-b" aria-label="Voltear carta de presupuesto">
-      <span class="card"><span class="face back b">PRESUPUESTO<small>¿Cuánto puedes gastar?</small></span><span class="face front" id="front-b"></span></span>
+    <button class="deck" data-kind="cond" id="deck-c" aria-label="Voltear carta de condición">
+      <span class="card"><span class="face back b">CONDICIÓN<small>¿Qué hará más difícil la obra?</small></span><span class="face front" id="front-c"></span></span>
     </button>
   </div>
   <button class="btn btn-green" id="btn-build" disabled>¡A construir!</button>
@@ -314,18 +318,23 @@ details ul{padding-left:18px;display:flex;flex-direction:column;gap:4px}
 <section id="s-build" class="screen" hidden>
   <div class="hud">
     <button class="backbtn" id="btn-exit-build" aria-label="Salir">←</button>
-    <div class="pill" id="coins">🪙 <b id="coins-left">0</b> <small>de <span id="coins-total">0</span></small></div>
+    <div class="pill" id="pieces">🧱 <b id="used">0</b> <small>piezas · meta <span id="par">0</span></small></div>
     <div class="pill timer" id="timer">5:00</div>
   </div>
   <div class="panel mission">
     <div class="row"><span class="big" id="m-icon"></span><div><p class="eyebrow" id="m-field"></p><h3 id="m-title"></h3></div></div>
+    <div class="condchip"><span id="m-cicon"></span><span><b id="m-cname"></b>: <span id="m-ctext"></span></span></div>
     <ul class="checklist" id="checklist"></ul>
     <details id="d-rules"><summary>Reglas de construcción</summary>
       <ul>
-        <li>Nada flota: todo va encima del suelo o de otro bloque.</li>
-        <li>Pilar, filtro y sensor van dentro del agua.</li>
-        <li>Más de 2 vigas seguidas sin nada abajo se caen.</li>
-        <li>Una torre de 4 o más sin un bloque pegado en la base se cae con el viento.</li>
+        <li>Nada flota. No se construye encima de paneles, antenas, árboles ni cables.</li>
+        <li>En la arena, lo pesado necesita cimiento.</li>
+        <li>Pilares, filtros y sensores van en el agua. Los pilares se apilan.</li>
+        <li>Vigas: máximo <span id="r-span">2</span> casillas sin apoyo entre apoyos, y 1 en la punta.</li>
+        <li>Columnas de <span id="r-wind">4</span>+ piezas se caen con el viento si no están pegadas de lado a algo.</li>
+        <li>Bajo la línea azul se dañan cables, paneles, computadores, antenas, ventanas y techos.</li>
+        <li>La energía viaja por piezas que se tocan. Los paneles necesitan sol.</li>
+        <li>Una persona sube 1 casilla y baja hasta 2.</li>
       </ul>
     </details>
     <details id="d-hint"><summary>¿Necesitan una pista?</summary><p id="m-hint"></p></details>
@@ -334,16 +343,24 @@ details ul{padding-left:18px;display:flex;flex-direction:column;gap:4px}
     <h3 id="report-title"></h3>
     <ul id="report-list"></ul>
   </div>
-  <div class="board"><span class="sun" aria-hidden="true"></span><div class="grid" id="grid"></div></div>
+  <div class="board-scroll" id="board-scroll">
+    <div class="board"><span class="sun" aria-hidden="true"></span>
+      <div class="grid" id="grid"></div>
+    </div>
+  </div>
+  <p class="scrollhint">↔ Desliza el mapa para ver toda la isla</p>
   <div class="palette-wrap"><div class="palette" id="palette"></div></div>
   <p class="tip" id="tip"></p>
-  <button class="btn btn-green" id="btn-test">Probar construcción</button>
+  <div class="tools">
+    <button class="btn btn-white btn-small" id="btn-undo">↶ Deshacer</button>
+    <button class="btn btn-green btn-small" id="btn-test">Probar</button>
+  </div>
 </section>
 
 <section id="s-result" class="screen" hidden>
   <div class="panel result">
     <div class="stars" id="stars"></div>
-    <div class="star-legend"><span>Problema resuelto</span><span>A la primera</span><span>Ahorro</span></div>
+    <div class="star-legend"><span>Problema resuelto</span><span>A la primera</span><span>Diseño eficiente</span></div>
     <h2 id="res-title"></h2>
     <p id="res-sub"></p>
     <ul class="checklist" id="res-list"></ul>
@@ -368,19 +385,20 @@ details ul{padding-left:18px;display:flex;flex-direction:column;gap:4px}
 
 <section id="s-lego" class="screen" hidden>
   <div class="bar"><button class="backbtn" data-go="home" aria-label="Volver">←</button><h2>Con Legos de verdad</h2></div>
-  <p class="hint">Toca cada montón para voltear su carta. Luego construyan la solución sobre la mesa.</p>
+  <p class="hint">Toca cada montón para voltear su carta. Luego construyan sobre la mesa.</p>
   <div class="decks">
     <button class="deck" data-kind="problem" id="ldeck-p" aria-label="Voltear carta de problema">
       <span class="card"><span class="face back p">PROBLEMA<small>¿Qué necesita la isla?</small></span><span class="face front" id="lfront-p"></span></span>
     </button>
-    <button class="deck" data-kind="budget" id="ldeck-b" aria-label="Voltear carta de presupuesto">
-      <span class="card"><span class="face back b">PRESUPUESTO<small>¿Cuánto puedes gastar?</small></span><span class="face front" id="lfront-b"></span></span>
+    <button class="deck" data-kind="cond" id="ldeck-c" aria-label="Voltear carta de condición">
+      <span class="card"><span class="face back b">CONDICIÓN<small>¿Qué hará más difícil la obra?</small></span><span class="face front" id="lfront-c"></span></span>
     </button>
   </div>
   <div class="panel" id="lego-goal" hidden>
     <p class="eyebrow">Qué deben construir</p>
     <p id="lego-goal-text"></p>
     <div class="test-box"><p class="eyebrow">La prueba</p><p id="lego-test-text"></p></div>
+    <div class="test-box" id="lego-cond-box" hidden><p class="eyebrow">Por la condición</p><p id="lego-cond-text"></p></div>
   </div>
   <div class="panel">
     <div class="bigtimer" id="ltimer">5:00</div>
@@ -388,12 +406,6 @@ details ul{padding-left:18px;display:flex;flex-direction:column;gap:4px}
       <button class="btn btn-green btn-small" id="lt-start">Empezar</button>
       <button class="btn btn-white btn-small" id="lt-reset">Reiniciar</button>
     </div>
-  </div>
-  <div class="panel">
-    <h3>Lista de precios</h3>
-    <p class="story">Sumen cada pieza que usen. No pueden pasarse del presupuesto.</p>
-    <div class="prices" id="prices"></div>
-    <div class="total"><span>Gastado: <span id="l-spent">0</span> 🪙</span><span id="l-left"></span></div>
   </div>
   <button class="btn btn-yellow" id="btn-lnew">Cartas nuevas</button>
 </section>
@@ -403,145 +415,222 @@ details ul{padding-left:18px;display:flex;flex-direction:column;gap:4px}
 <script>
 (function(){
 const $ = s => document.querySelector(s);
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const reducedMotion = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-/* where: ground = directly on soil; water = inside the river; build = on top of soil or a block; beam = like build, or attached sideways */
+/* where: build = on soil or a firm piece; ground = directly on soil/sand (or a foundation); pile = on bed/soil/firm piece, may stand in water;
+   water = inside river or sea; beam = like build, or attached sideways; cable = touching something (8 neighbours) */
 const BLOCKS = {
-  ladrillo:  {name:'Ladrillo',    price:2, color:'#e3342f', icon:'🧱', where:'build'},
-  ventana:   {name:'Ventana',     price:2, color:'#9fd8f5', icon:'🔲', where:'build'},
-  techo:     {name:'Techo',       price:3, color:'#1f6fd1', icon:'🏠', where:'build'},
-  viga:      {name:'Viga',        price:2, color:'#7a4a2a', icon:'➖', where:'beam'},
-  pilar:     {name:'Pilar',       price:3, color:'#8a8f98', icon:'🗿', where:'water'},
-  arbol:     {name:'Árbol',       price:1, color:'#2e9e44', icon:'🌳', where:'ground'},
-  reciclaje: {name:'Reciclaje',   price:2, color:'#9bd13a', icon:'♻️', where:'ground'},
-  columpio:  {name:'Columpio',    price:3, color:'#f08a24', icon:'🛝', where:'ground'},
-  filtro:    {name:'Filtro',      price:5, color:'#3fb8e8', icon:'💧', where:'water'},
-  sensor:    {name:'Sensor',      price:3, color:'#ffcd1f', icon:'📊', where:'water'},
-  panel:     {name:'Panel solar', price:5, color:'#2b2f36', icon:'☀️', where:'build'},
-  computador:{name:'Computador',  price:5, color:'#f3f3f0', icon:'💻', where:'build'},
-  antena:    {name:'Antena',      price:6, color:'#c0392b', icon:'📡', where:'build'}
+  cimiento:  {name:'Cimiento',   color:'#5d6470', icon:'🪨', where:'ground'},
+  ladrillo:  {name:'Ladrillo',   color:'#e3342f', icon:'🧱', where:'build'},
+  ventana:   {name:'Ventana',    color:'#9fd8f5', icon:'🔲', where:'build'},
+  techo:     {name:'Techo',      color:'#1f6fd1', icon:'🔺', where:'build'},
+  viga:      {name:'Viga',       color:'#7a4a2a', icon:'➖', where:'beam'},
+  pilar:     {name:'Pilar',      color:'#8a8f98', icon:'🏛️', where:'pile'},
+  arbol:     {name:'Árbol',      color:'#2e9e44', icon:'🌳', where:'ground'},
+  reciclaje: {name:'Reciclaje',  color:'#9bd13a', icon:'♻️', where:'ground'},
+  filtro:    {name:'Filtro',     color:'#3fb8e8', icon:'💧', where:'water'},
+  sensor:    {name:'Sensor',     color:'#ffcd1f', icon:'📊', where:'water'},
+  panel:     {name:'Panel solar',color:'#2b2f36', icon:'☀️', where:'build'},
+  computador:{name:'Computador', color:'#f3f3f0', icon:'💻', where:'build'},
+  antena:    {name:'Antena',     color:'#c0392b', icon:'📡', where:'build'},
+  cable:     {name:'Cable',      color:'#ffcd1f', icon:'⚡', where:'cable'}
 };
-const WHERE_LABEL = {ground:'en el suelo', water:'en el agua', build:'encima de algo', beam:'encima o al lado'};
-const STOCK = {ladrillo:8, ventana:2, techo:3, viga:5, pilar:1, arbol:4, reciclaje:1, columpio:2, filtro:1, sensor:2, panel:2, computador:1, antena:1};
+const FIXED = {
+  casa:{name:'Casa', color:'#f3dca4', icon:'🏡'}, escuela:{name:'Escuela', color:'#f3dca4', icon:'🏫'},
+  fabrica:{name:'Fábrica', color:'#b9bec6', icon:'🏭'}, hospital:{name:'Hospital', color:'#ffffff', icon:'🏥'},
+  torre:{name:'Torre de la ciudad', color:'#d0d4da', icon:'🗼'}
+};
+const WHERE_LABEL = {ground:'en el suelo', water:'en el agua', build:'encima de algo', beam:'encima o al lado', pile:'agua o suelo', cable:'pegado a algo'};
+const NOSUPPORT = new Set(['cable','arbol','antena','panel','sensor']);
+const PASSABLE = new Set(['cable','arbol']);
+const LIGHT = new Set(['cable','arbol']);
+const WATERPROOF = new Set(['pilar','viga','cimiento','filtro','sensor','ladrillo','arbol','reciclaje']);
+const SINK_EXEMPT = new Set(['cimiento','pilar','arbol','cable','reciclaje','panel','sensor','filtro']);
+const CONDUCT = new Set(['cable','panel','computador','antena','casa','hospital']);
 
-/* Side view. a = air, t = soil, w = river water, l = river bed */
-const MAP = [
-  "aaaaaaaaaa","aaaaaaaaaa","aaaaaaaaaa","aaaaaaaaaa","aaaaaaaaaa","aaaaaaaaaa",
-  "ttttwwwttt",
-  "ttttlllttt"
+/* Side view, one string per column (top → bottom). a air, t soil, s sand, w water, l river/sea bed */
+const COLSPEC = [
+  'aaaaaaawwl','aaaaaaawwl',             // 0-1 sea
+  'aaaaaaastt','aaaaaasttt',             // 2-3 beach
+  'aaaaaatttt','aaaaaatttt','aaaaaatttt',// 4-6 village plateau
+  'aaaaaaawwl','aaaaaaawwl','aaaaaaawwl',// 7-9 river
+  'aaaaaatttt',                          // 10 bank
+  'aaaatttttt','aaaatttttt',             // 11-12 hill
+  'aaaaaatttt',                          // 13 slope
+  'aaaaaaastt',                          // 14 beach
+  'aaaaaaawwl'                           // 15 sea
 ];
-const COLS = 10, ROWS = 8, BANKS = [3,7];
+const COLS = 16, ROWS = 10, WATER_LEVEL = 7;
 
-const S = {problem:null, tier:null, budget:0, grid:[], sel:null, left:0, stock:{}, time:300, timer:null, tests:0, busy:false};
+const S = {problem:null, cond:null, grid:[], sel:null, stock:{}, time:300, timer:null, tests:0, busy:false, history:[], F:WATER_LEVEL};
 const idx = (r,c) => r*COLS+c;
 const inside = (r,c) => r>=0 && r<ROWS && c>=0 && c<COLS;
 const B = (r,c) => inside(r,c) ? S.grid[idx(r,c)].b : null;
-const T = (r,c) => inside(r,c) ? S.grid[idx(r,c)].t : 't';
+const T = (r,c) => inside(r,c) ? S.grid[idx(r,c)].t : (r>=ROWS ? 't' : 'x');
+const solidT = (r,c) => { const t = T(r,c); return t==='t' || t==='s' || t==='l'; };
+const isFixed = i => !!S.grid[i].fixed;
 const cellsOf = id => S.grid.map((c,i) => c.b===id ? [Math.floor(i/COLS), i%COLS] : null).filter(Boolean);
 const count = id => cellsOf(id).length;
+const colHas = (c,id) => { for (let r=0;r<ROWS;r++) if (B(r,c)===id) return true; return false; };
 const isWall = b => b==='ladrillo' || b==='ventana';
-const sunny = (r,c) => { for (let k=r-1; k>=0; k--) if (B(k,c)) return false; return true; };
+const sunny = (r,c) => { for (let k=r-1;k>=0;k--){ const b=B(k,c); if (b && b!=='cable') return false; } return true; };
 const houses = () => cellsOf('techo').filter(([r,c]) => isWall(B(r+1,c)) && isWall(B(r+2,c)))
   .map(([r,c]) => ({r, c, win: B(r+1,c)==='ventana' || B(r+2,c)==='ventana'}));
 const req = (t, ok) => ({t, ok});
+const usedCount = () => S.grid.filter(c => c.b && !c.fixed).length;
+
+function network(){
+  const comp = new Array(S.grid.length).fill(-1); let id = 0;
+  S.grid.forEach((cell,i) => {
+    if (!CONDUCT.has(cell.b) || comp[i] >= 0) return;
+    const q = [i]; comp[i] = id;
+    while (q.length){
+      const j = q.pop(), r = Math.floor(j/COLS), c = j%COLS;
+      [[r-1,c],[r+1,c],[r,c-1],[r,c+1]].forEach(([rr,cc]) => {
+        if (!inside(rr,cc)) return; const k = idx(rr,cc);
+        if (comp[k] < 0 && CONDUCT.has(S.grid[k].b)) { comp[k] = id; q.push(k); }
+      });
+    }
+    id++;
+  });
+  return comp;
+}
+function poweredComps(comp){
+  const on = new Set();
+  cellsOf('panel').forEach(([r,c]) => { if (sunny(r,c)) on.add(comp[idx(r,c)]); });
+  return on;
+}
+const sameNet = (comp, a, b) => comp[idx(...a)] >= 0 && comp[idx(...a)] === comp[idx(...b)];
+
+/* Walking: stand on an air cell (or tree/cable) above firm ground, above the water line. Up 1, down up to 2. */
+function passable(r,c,F){ return inside(r,c) && T(r,c)==='a' && r < F && (!B(r,c) || PASSABLE.has(B(r,c))); }
+function standable(r,c,F){
+  if (!passable(r,c,F) || r+1 >= ROWS) return false;
+  const bt = T(r+1,c), bb = B(r+1,c);
+  if (bb) return !NOSUPPORT.has(bb);
+  return bt==='t' || bt==='s';
+}
+function walkPath(w, F){
+  const prev = new Map(), q = [];
+  for (const c of w.from) for (let r=0;r<ROWS;r++) if (standable(r,c,F)) { const k=idx(r,c); prev.set(k,-1); q.push(k); }
+  let best = q[0], goal = null;
+  while (q.length){
+    const k = q.shift(), r = Math.floor(k/COLS), c = k%COLS;
+    if (w.to(r,c)) { goal = k; break; }
+    if (best === undefined || c*w.dir > (best%COLS)*w.dir) best = k;
+    for (const dc of [-1,1]){
+      const nc = c+dc;
+      for (const nr of [r, r-1, r+1, r+2]){
+        if (!standable(nr,nc,F) || prev.has(idx(nr,nc))) continue;
+        if (nr === r-1 && !passable(r-1,c,F)) continue;
+        if (nr > r && !passable(r,nc,F)) continue;
+        if (nr === r+2 && !passable(r+1,nc,F)) continue;
+        prev.set(idx(nr,nc), k); q.push(idx(nr,nc));
+      }
+    }
+  }
+  const end = goal ?? best, path = [];
+  for (let k = end; k !== undefined && k !== -1; k = prev.get(k)) path.unshift(k);
+  return {ok: goal !== null, path};
+}
 
 const PROBLEMS = [
-  {id:'puente', field:'Ingeniería civil', icon:'🌉', title:'¡Se cayó el puente!', min:13,
-   story:'Los niños del otro lado del río no pueden llegar a la escuela.',
-   hint:'El río tiene 3 casillas de ancho. Si pones las vigas sin nada abajo se caen: pon un pilar en el agua, en el centro, para sostenerlas.',
-   about:'Las ingenieras e ingenieros civiles diseñan puentes, carreteras y edificios seguros. Calculan cuánto peso aguanta cada parte.',
-   lego:'Un puente que una dos orillas (dos libros separados a 15 cm) usando un pilar en el medio.',
-   test:'Pongan un estuche lleno encima del puente durante 5 segundos. No se debe caer.',
-   check(){ const full = [0,1,2,3,4,5].some(r => [3,4,5,6,7].every(c => B(r,c)==='viga'));
-     return [req('Una fila de vigas de una orilla a la otra (5 vigas)', full),
-             req('Que aguante el camión en la prueba', full && S.tests>0)]; }},
-  {id:'rio', field:'Ingeniería ambiental', icon:'🐟', title:'El río está sucio', min:13,
-   story:'Los peces se enferman y nadie puede usar el agua.',
-   hint:'Pon el filtro en el agua. Luego construye un muelle: vigas desde la orilla hasta encima del filtro, para que alguien pueda ir a limpiarlo.',
-   about:'La ingeniería ambiental cuida el agua, el aire y la tierra. Inventa filtros, plantas de reciclaje y formas de contaminar menos.',
-   lego:'Un filtro dentro del "río", un muelle para llegar a limpiarlo, árboles en las orillas y un punto de reciclaje.',
-   test:'Hagan caminar un muñequito por el muelle hasta el filtro. El muelle no se puede caer.',
-   check(){ const docks = cellsOf('filtro').some(([r,c]) => r===6 && ([3,4,5,6].filter(k=>k<=c&&k>=3).every(k=>B(5,k)==='viga') || [4,5,6,7].filter(k=>k>=c).every(k=>B(5,k)==='viga')));
-     const banks = [[2,3],[7,8]].every(side => side.some(c => B(5,c)==='arbol'));
-     return [req('Un filtro dentro del río', count('filtro')>=1),
-             req('Un muelle de vigas desde la orilla hasta encima del filtro', docks),
-             req('Un árbol en cada orilla, cerca del río', banks),
-             req('Un punto de reciclaje en el suelo', count('reciclaje')>=1)]; }},
-  {id:'luz', field:'Ingeniería ambiental y civil', icon:'💡', title:'Las casas no tienen luz', min:24,
-   story:'De noche todo queda a oscuras. Necesitan energía limpia.',
-   hint:'Una casa de 2 bloques de ancho tiene 2 techos. Si pones un panel encima de cada techo, la columna queda de 4 bloques: por eso es mejor que las dos columnas estén pegadas, así no se las lleva el viento.',
-   about:'Ingenieras e ingenieros diseñan energía que no contamina, como paneles solares, y la llevan hasta cada casa.',
-   lego:'Una casa con techo y paneles solares (piezas planas oscuras) encima del techo.',
-   test:'Soplen fuerte 3 veces desde 30 cm. La casa y los paneles no se deben caer.',
-   check(){ const panels = cellsOf('panel').filter(([r,c]) => B(r+1,c)==='techo' && sunny(r,c)).length;
-     return [req('Una casa: techo encima de 2 bloques de pared', houses().length>=1),
-             req('2 paneles solares encima de techos, sin sombra', panels>=2)]; }},
-  {id:'tormenta', field:'Ingeniería civil', icon:'🌧️', title:'La tormenta dañó las casas', min:14,
-   story:'Dos familias necesitan casas nuevas, lejos del río que se desborda.',
-   hint:'Cada casa es un techo encima de 2 bloques de pared, y uno de ellos puede ser la ventana. Las columnas 4 y 8, pegadas al río, se inundan.',
-   about:'La ingeniería civil decide dónde y cómo construir para que las casas resistan viento, lluvia e inundaciones.',
-   lego:'Dos casas con ventana y techo, construidas lejos del borde del "río".',
-   test:'Soplen fuerte 3 veces desde 30 cm. Las casas no se deben caer.',
-   check(){ const h = houses();
-     return [req('2 casas con ventana (techo sobre 2 bloques de pared)', h.filter(x=>x.win).length>=2),
-             req('Ninguna casa pegada al río', h.length>0 && h.every(x => !BANKS.includes(x.c)))]; }},
-  {id:'señal', field:'Ingeniería de sistemas', icon:'📵', title:'La isla está incomunicada', min:17,
-   story:'Sin internet, el médico no puede pedir ayuda.',
-   hint:'La antena tiene que estar a 4 pisos, así que la columna tendrá 4 bloques y el viento la tumba. Si pones el computador pegado a la base de la torre, la sostiene.',
-   about:'La ingeniería de sistemas conecta computadores, redes y antenas, y crea programas para que la información llegue a quien la necesita.',
-   lego:'Una torre con antena, la más alta de la mesa, y un computador conectado a ella.',
-   test:'Soplen fuerte 3 veces. La torre debe quedar de pie.',
-   check(){ const ant = cellsOf('antena'); const high = ant.some(([r]) => r<=2);
-     const linked = cellsOf('computador').some(([,c]) => ant.some(([,ac]) => Math.abs(ac-c)===1));
-     return [req('Antena a 4 pisos de altura o más', high),
-             req('Un computador pegado a la torre de la antena', linked),
-             req('Que la torre aguante el viento en la prueba', high && S.tests>0)]; }},
-  {id:'peces', field:'Ciencia de datos e IA', icon:'🎣', title:'¿Cuántos peces quedan?', min:16,
-   story:'Los pescadores no saben si están pescando demasiado.',
-   hint:'Dos sensores juntos miden lo mismo. Sepáralos para medir dos partes distintas del río. El computador va en la orilla y necesita un panel solar al lado o encima.',
+  {id:'puente', field:'Ingeniería civil', icon:'🌉', title:'¡Se cayó el puente!',
+   story:'Los niños del pueblo no pueden cruzar el río para llegar a la escuela de la colina.',
+   fixed:[['casa',5,4],['escuela',3,12]],
+   stock:{viga:5, pilar:4, ladrillo:4, cimiento:2, arbol:2}, par:7,
+   walk:{from:[5], to:(r,c) => c===11 && r<=3, dir:1, who:'🧒'},
+   hint:'El río mide 3 casillas: las vigas solas no aguantan. Apilen pilares desde el fondo del río para sostener el centro. La colina es 2 casillas más alta: hagan un escalón para que el niño suba de a 1.',
+   about:'Las ingenieras e ingenieros civiles diseñan puentes, carreteras y edificios. Calculan dónde poner los apoyos para que aguanten el peso.',
+   lego:'Un puente entre dos libros separados 15 cm, con un pilar en el medio, y un escalón para subir a la "colina" (un libro más alto).',
+   test:'Pasen un carrito con un estuche encima por todo el puente y hasta la colina.',
+   check(ctx){ const bridge = [0,1,2,3,4,5,6].some(r => [7,8,9].every(c => B(r,c)==='viga'));
+     return [req('Un puente de vigas que cruce todo el río', bridge),
+             req('Un niño puede caminar de su casa a la escuela', ctx.walk().ok)]; }},
+  {id:'rio', field:'Ingeniería ambiental', icon:'🐟', title:'La fábrica ensucia el río',
+   story:'Los peces se enferman. Hay que filtrar el agua y poder llegar al filtro para limpiarlo.',
+   fixed:[['fabrica',5,4]],
+   stock:{filtro:1, pilar:3, viga:4, arbol:3, reciclaje:1, cimiento:2, ladrillo:2}, par:8,
+   walk:{from:[5,6], to:(r,c) => c===8 && colHas(8,'filtro'), dir:1, who:'👷'},
+   hint:'Un muelle es como medio puente: sale de la orilla y necesita un apoyo cerca de la punta. Un pilar se puede apoyar encima del filtro.',
+   about:'La ingeniería ambiental cuida el agua, el aire y la tierra. Diseña filtros, plantas de reciclaje y formas de contaminar menos.',
+   lego:'Un filtro en el centro del "río" (hoja azul), un muelle con pilar para llegar hasta él, árboles en las orillas y un punto de reciclaje junto a la fábrica.',
+   test:'Un muñequito camina por el muelle hasta quedar encima del filtro, sin que nada se caiga.',
+   check(ctx){
+     return [req('Un filtro en el centro del río (columna del medio)', colHas(8,'filtro')),
+             req('Un muelle: se puede caminar desde la fábrica hasta encima del filtro', ctx.walk().ok),
+             req('Un árbol en cada orilla, pegado al río', B(5,6)==='arbol' && B(5,10)==='arbol'),
+             req('Un punto de reciclaje pegado a la fábrica', B(5,5)==='reciclaje' || B(5,3)==='reciclaje')]; }},
+  {id:'luz', field:'Ingeniería ambiental y eléctrica', icon:'💡', title:'Dos casas sin luz',
+   story:'Una casa del pueblo y una de la playa están a oscuras. Necesitan energía solar.',
+   fixed:[['casa',5,4],['casa',5,13]],
+   stock:{panel:4, cable:14, pilar:4, viga:3, ladrillo:4, cimiento:2}, par:20,
+   hint:'Hagan una central de 3 paneles juntos donde les dé el sol. Los cables no flotan: sobre el río necesitan pilares, y para pasar la colina pueden ir pegados a la tierra.',
+   about:'Las ingenieras e ingenieros diseñan energía que no contamina, como paneles solares, y redes de cables que la llevan a cada casa.',
+   lego:'Una central solar de 3 piezas planas oscuras juntas, unida con "cables" (tiras de papel) a dos casas separadas por un río y una colina.',
+   test:'Sigan el cable con el dedo desde los paneles hasta cada casa sin levantarlo. Luego soplen fuerte.',
+   check(){ const comp = network(), on = poweredComps(comp);
+     const sp = cellsOf('panel').filter(([r,c]) => sunny(r,c));
+     const group = sp.some(([r,c]) => { let n=1; for (let k=c-1; B(r,k)==='panel' && sunny(r,k); k--) n++; for (let k=c+1; B(r,k)==='panel' && sunny(r,k); k++) n++; return n>=3; });
+     return [req('3 paneles solares juntos en fila y al sol', group),
+             req('La casa del pueblo tiene luz', on.has(comp[idx(5,4)])),
+             req('La casa de la playa tiene luz', on.has(comp[idx(5,13)]))]; }},
+  {id:'tormenta', field:'Ingeniería civil', icon:'🌧️', title:'Viene una inundación', flood:5,
+   story:'El río va a crecer. Dos familias necesitan casas que queden secas.',
+   fixed:[['hospital',3,12]],
+   stock:{ladrillo:6, ventana:2, techo:2, pilar:5, cimiento:3, viga:2}, par:10,
+   hint:'La línea azul es hasta donde subirá el agua. En el Pacífico colombiano construyen palafitos: casas sobre pilares. Una casa sobre pilares es alta y delgada: pónganla pegada a otra para que el viento no la tumbe.',
+   about:'La ingeniería civil decide dónde y cómo construir para que las casas resistan inundaciones, viento y temblores.',
+   lego:'Dos casas con ventana y techo, con todo su cuerpo por encima de la "línea del agua" (2 piezas de alto). Pueden usar pilares como palafitos.',
+   test:'Pongan una regla a 2 piezas de alto: las casas deben quedar por encima. Luego soplen fuerte 3 veces.',
+   check(ctx){ const h = houses().filter(x => x.win);
+     return [req('2 casas con ventana (techo encima de 2 piezas de pared)', h.length>=2),
+             req('Las 2 casas quedan por encima de la línea azul', h.filter(x => x.r+2 < ctx.F).length>=2)]; }},
+  {id:'señal', field:'Ingeniería de sistemas', icon:'📵', title:'El hospital está incomunicado',
+   story:'La colina tapa la señal entre el hospital y la torre de la ciudad.',
+   fixed:[['hospital',5,4],['torre',3,15],['torre',4,15],['torre',5,15],['torre',6,15],['torre',7,15],['torre',8,15]],
+   stock:{ladrillo:6, antena:1, cable:8, panel:2, cimiento:2, pilar:2}, par:8,
+   hint:'La señal viaja en línea recta: la antena debe estar más alta que la colina y sin nada en su fila hasta la torre. Las piezas eléctricas tienen que tocarse de lado o arriba y abajo para conectarse.',
+   about:'La ingeniería de sistemas conecta computadores, antenas y redes para que la información llegue a quien la necesita.',
+   lego:'Una torre con antena más alta que la "montaña" (un libro parado) que hay entre el hospital y la ciudad, conectada al hospital.',
+   test:'Miren con un ojo desde la punta de la antena: deben ver la ciudad sin que la montaña la tape. Luego soplen fuerte.',
+   check(){ const comp = network(), on = poweredComps(comp), ant = cellsOf('antena');
+     const sees = ([r,c]) => r<=3 && Array.from({length:14-c}, (_,k) => c+1+k).every(k => T(r,k)==='a' && !B(r,k));
+     return [req('Antena con vista libre hasta la torre de la ciudad', ant.some(sees)),
+             req('La antena está conectada al hospital', ant.some(a => sameNet(comp, a, [5,4]))),
+             req('El hospital tiene energía de un panel al sol', on.has(comp[idx(5,4)]))]; }},
+  {id:'peces', field:'Ciencia de datos e IA', icon:'🎣', title:'¿Cuántos peces quedan?',
+   story:'Los pescadores no saben si están pescando demasiado. Hay que medir el agua.',
+   fixed:[],
+   stock:{sensor:2, antena:1, computador:1, panel:2, cable:8, ladrillo:4, cimiento:2, pilar:2}, par:10,
+   hint:'La antena alcanza 4 columnas a cada lado: pónganla entre el mar y el río. Las olas tapan la señal, así que súbanla 2 pisos. Antena, computador y panel deben tocarse con cables.',
    about:'La ciencia de datos y la inteligencia artificial miden, cuentan y encuentran patrones para tomar mejores decisiones.',
-   lego:'Dos sensores separados en el agua y una estación en la orilla con computador y panel solar.',
-   test:'Expliquen qué mide cada sensor y cómo llegan los datos al computador.',
-   check(){ const s = cellsOf('sensor').map(([,c])=>c); const apart = s.some(a => s.some(b => Math.abs(a-b)>=2));
-     const pcs = cellsOf('computador').filter(([,c]) => BANKS.includes(c));
-     const powered = pcs.some(([r,c]) => ['panel'].includes(B(r,c-1)) || B(r,c+1)==='panel' || B(r-1,c)==='panel');
-     return [req('2 sensores en el agua, separados (no uno al lado del otro)', apart),
-             req('Un computador en la orilla, pegado al río', pcs.length>0),
-             req('Un panel solar al lado o encima del computador', powered)]; }},
-  {id:'parque', field:'Ingeniería financiera', icon:'🎢', title:'Un parque con poco dinero', min:12,
-   story:'La isla quiere un parque, pero también ahorrar para el futuro.',
-   hint:'Cada árbol cuesta 1 moneda. Antes de construir, calcula cuánto es la mitad de tu presupuesto.',
-   about:'La ingeniería financiera ayuda a usar bien el dinero: planear, ahorrar y decidir en qué vale la pena invertir.',
-   lego:'Un parque con árboles y un columpio.',
-   test:'Gastar como máximo la mitad del presupuesto.',
-   check(){ return [req('3 árboles', count('arbol')>=3),
-                    req('1 columpio', count('columpio')>=1),
-                    req('Ahorrar al menos la mitad del presupuesto', S.left*2 >= S.budget)]; }}
+   lego:'Dos sensores (piezas de colores) en dos aguas distintas y una antena de 3 pisos conectada a un computador con panel solar.',
+   test:'Expliquen qué mide cada sensor y por dónde viajan los datos hasta el computador. Luego soplen fuerte.',
+   check(){ const comp = network(), on = poweredComps(comp), ant = cellsOf('antena'), sen = cellsOf('sensor');
+     const high = ant.some(([r,c]) => B(r+1,c) && B(r+2,c) && !LIGHT.has(B(r+1,c)) && !LIGHT.has(B(r+2,c)));
+     const reach = sen.length>=2 && sen.every(([,c]) => ant.some(([,ac]) => Math.abs(ac-c)<=4));
+     const linked = ant.some(a => cellsOf('computador').some(p => sameNet(comp, a, p)) && on.has(comp[idx(...a)]));
+     return [req('Un sensor en el río', sen.some(([,c]) => c>=7 && c<=9)),
+             req('Un sensor en el mar', sen.some(([,c]) => c<=1 || c===15)),
+             req('La antena con 2 pisos debajo', high),
+             req('Cada sensor a 4 columnas o menos de la antena', reach),
+             req('Antena, computador y un panel al sol conectados', linked)]; }}
 ];
 
-const TIERS = [
-  {name:'Ajustado', bonus:2,  tip:'Casi no hay margen. Lo que se caiga no se recupera.'},
-  {name:'Justo',    bonus:4,  tip:'Te alcanza si planeas bien.'},
-  {name:'Cómodo',   bonus:7,  tip:'Tienes un poco para corregir errores.'},
-  {name:'Generoso', bonus:10, tip:'Resuelve el problema y decora tu isla.'}
-];
-const LEGO_BUDGETS = [
-  {name:'Ajustado', amt:15, tip:'Usen pocas piezas y muy bien pensadas.'},
-  {name:'Justo',    amt:20, tip:'Planeen antes de construir.'},
-  {name:'Cómodo',   amt:25, tip:'Pueden agregar un detalle extra.'},
-  {name:'Generoso', amt:30, tip:'Construyan y decoren la isla.'}
-];
-const LEGO_PRICES = [
-  {id:'s', name:'Pieza pequeña',  desc:'1×1 o 1×2',             price:1, color:'#ffcd1f'},
-  {id:'m', name:'Pieza mediana',  desc:'2×2 o 1×4',             price:2, color:'#2e9e44'},
-  {id:'l', name:'Pieza grande',   desc:'2×4 o más larga',       price:3, color:'#e3342f'},
-  {id:'p', name:'Placa plana',    desc:'Cualquier tamaño',      price:2, color:'#1f6fd1'},
-  {id:'x', name:'Pieza especial', desc:'Ventana, puerta, rueda, planta', price:4, color:'#f08a24'},
-  {id:'f', name:'Muñequito',      desc:'Una persona de Lego',   price:5, color:'#f3f3f0'}
+const CONDS = [
+  {id:'calma',  name:'Día tranquilo', icon:'🌤️', text:'Sin sorpresas: solo la prueba normal.', lego:''},
+  {id:'viento', name:'Viento fuerte', icon:'💨', text:'Columnas de 3 piezas o más se caen si no están pegadas de lado a algo.', lego:'Soplen 5 veces en lugar de 3.'},
+  {id:'lluvia', name:'Lluvia fuerte', icon:'🌧️', text:'El agua sube una fila más. Lo eléctrico mojado se daña.', lego:'La línea del agua sube una pieza más.'},
+  {id:'camion', name:'Camión pesado', icon:'🚛', text:'Las vigas solo aguantan 1 casilla sin apoyo entre apoyos.', lego:'Pongan el doble de peso encima de lo que construyan.'},
+  {id:'blando', name:'Terreno blando', icon:'🏖️', text:'Todo el suelo está blando: lo pesado necesita cimiento.', lego:'Construyan encima de una servilleta: lo pesado necesita una base ancha.'},
+  {id:'prisa',  name:'Poco tiempo', icon:'⏳', text:'Solo tienen 3 minutos.', lego:'Solo tienen 3 minutos.'}
 ];
 
 function pick(list, avoid){ let x; do { x = list[Math.floor(Math.random()*list.length)]; } while (list.length>1 && x===avoid); return x; }
 const fmt = s => Math.floor(s/60)+':'+String(s%60).padStart(2,'0');
-const brickHTML = (color, icon) => `<span class="brick" style="--c:${color}">${icon?`<span class="ico">${icon}</span>`:''}</span>`;
+const brickHTML = (color, icon, cls) => `<span class="brick${cls?' '+cls:''}" style="--c:${color}">${icon?`<span class="ico">${icon}</span>`:''}</span>`;
 
 let ac;
 function tone(freq, dur, type, delay){
@@ -557,7 +646,7 @@ function tone(freq, dur, type, delay){
 /* Navigation */
 const screens = ['home','howto','install','draw','build','result','lego'];
 function go(name){
-  if (name !== 'build') stopBuildTimer();
+  if (name !== 'build') { stopBuildTimer(); S.busy = false; }
   if (name !== 'lego') pauseLego();
   screens.forEach(n => $('#s-'+n).hidden = n !== name);
   if (name === 'draw') newCards();
@@ -568,198 +657,328 @@ document.addEventListener('click', e => { const b = e.target.closest('[data-go]'
 
 /* Decks */
 const problemFront = p => `<span class="field">${p.field}</span><span class="big">${p.icon}</span><strong>${p.title}</strong><span class="story">${p.story}</span>`;
-const budgetFront = (amt, t) => `<span class="field">${t.name}</span><span class="coin">${amt}</span><strong>monedas</strong><span class="story">${t.tip}</span>`;
+const condFront = c => `<span class="field">Condición</span><span class="big">${c.icon}</span><strong>${c.name}</strong><span class="story">${c.text}</span>`;
 function setupDeck(deck, onFlip){
   deck.addEventListener('click', () => { if (deck.classList.contains('flipped')) return; deck.classList.add('flipped'); tone(520,.12,'triangle'); onFlip(); });
 }
-const deckP = $('#deck-p'), deckB = $('#deck-b');
+const deckP = $('#deck-p'), deckC = $('#deck-c');
 function newCards(){
-  S.problem = pick(PROBLEMS, S.problem); S.tier = pick(TIERS);
-  S.budget = S.problem.min + S.tier.bonus;
-  deckP.classList.remove('flipped'); deckB.classList.remove('flipped');
-  setTimeout(() => { $('#front-p').innerHTML = problemFront(S.problem); $('#front-b').innerHTML = budgetFront(S.budget, S.tier); }, 250);
+  S.problem = pick(PROBLEMS, S.problem); S.cond = pick(CONDS);
+  deckP.classList.remove('flipped'); deckC.classList.remove('flipped');
+  setTimeout(() => { $('#front-p').innerHTML = problemFront(S.problem); $('#front-c').innerHTML = condFront(S.cond); }, 250);
   $('#btn-build').disabled = true;
 }
-const checkReady = () => { $('#btn-build').disabled = !(deckP.classList.contains('flipped') && deckB.classList.contains('flipped')); };
-setupDeck(deckP, checkReady); setupDeck(deckB, checkReady);
+const checkReady = () => { $('#btn-build').disabled = !(deckP.classList.contains('flipped') && deckC.classList.contains('flipped')); };
+setupDeck(deckP, checkReady); setupDeck(deckC, checkReady);
 $('#btn-reshuffle').addEventListener('click', newCards);
 $('#btn-build').addEventListener('click', startBuild);
 
 /* Build */
 const gridEl = $('#grid'), paletteEl = $('#palette'), tipEl = $('#tip');
-const TERRAIN = {a:'aire', t:'suelo', w:'agua del río', l:'fondo del río'};
-
-Object.entries(BLOCKS).forEach(([id,b]) => {
-  const el = document.createElement('button');
-  el.className = 'chip'; el.dataset.id = id; el.id = 'chip-'+id;
-  el.innerHTML = `<span class="stock" id="stock-${id}"></span>${brickHTML(b.color,b.icon)}<span class="name">${b.name}</span><span class="price">🪙 ${b.price}</span><span class="where">${WHERE_LABEL[b.where]}</span>`;
-  el.addEventListener('click', () => {
-    if (S.busy) return;
-    S.sel = id; tone(660,.05); renderPalette();
-    const n = S.stock[id];
-    showTip(`${b.name}: cuesta ${b.price} ${b.price===1?'moneda':'monedas'} y va ${WHERE_LABEL[b.where]}. ${n===0?'¡Ya no quedan en la bodega!':`Quedan ${n} en la bodega.`} Los cuadros punteados muestran dónde cabe.`);
-  });
-  paletteEl.appendChild(el);
-});
+const TERRAIN = {a:'aire', t:'tierra', s:'arena', w:'agua', l:'fondo'};
+const maxSpan = () => S.cond.id==='camion' ? 1 : 2;
+const windMin = () => S.cond.id==='viento' ? 3 : 4;
+const soft = (r,c) => T(r,c)==='s' || (S.cond.id==='blando' && T(r,c)==='t');
 
 function canPlace(i, id){
   const r = Math.floor(i/COLS), c = i%COLS, cell = S.grid[i], b = BLOCKS[id];
-  if (cell.t==='t' || cell.t==='l') return 'Ahí hay tierra. Construye encima.';
-  if (b.where==='water') return cell.t==='w' ? true : `${b.name} va dentro del agua del río.`;
-  if (cell.t==='w') return `${b.name} no va en el agua.`;
-  const below = T(r+1,c), belowBlock = B(r+1,c);
-  if (b.where==='ground') return below==='t' && !belowBlock ? true : `${b.name} va directo en el suelo.`;
-  if (below==='t' || belowBlock) return true;
-  if (id==='viga' && (B(r,c-1) || B(r,c+1))) return true;
-  return id==='viga' ? 'La viga necesita algo abajo o un bloque pegado al lado.' : '¡Nada flota! Ponlo encima del suelo o de otro bloque.';
+  if (cell.b) return 'Ese lugar ya está ocupado.';
+  if (solidT(r,c)) return 'Ahí hay tierra. Construye encima.';
+  const inWater = cell.t==='w';
+  const bb = B(r+1,c);
+  const firmBelow = solidT(r+1,c) || (bb && !NOSUPPORT.has(bb));
+  if (b.where==='water') return inWater ? (firmBelow ? true : `${b.name} debe apoyarse en el fondo o en otra pieza.`) : `${b.name} va dentro del agua.`;
+  if (b.where==='pile') return firmBelow ? true : 'El pilar necesita apoyarse en el fondo, el suelo u otra pieza firme.';
+  if (inWater) return `${b.name} no va dentro del agua. Pon un pilar primero.`;
+  if (b.where==='ground') {
+    const bt = T(r+1,c);
+    if ((bt==='t' || bt==='s') || (id!=='cimiento' && bb==='cimiento')) return true;
+    return `${b.name} va directo en el suelo.`;
+  }
+  if (b.where==='cable') {
+    for (const [dr,dc] of [[-1,-1],[-1,0],[-1,1],[0,-1],[0,1],[1,-1],[1,0],[1,1]]) {
+      const rr=r+dr, cc=c+dc, t=T(rr,cc), nb=B(rr,cc);
+      if (t==='t' || t==='s' || (nb && nb!=='cable')) return true;
+    }
+    return 'El cable no flota: tiene que tocar la tierra o una pieza (no solo otro cable).';
+  }
+  if (firmBelow) return true;
+  if (bb && NOSUPPORT.has(bb)) return `No se puede construir encima de ${(BLOCKS[bb]||FIXED[bb]).name.toLowerCase()}.`;
+  if (b.where==='beam') {
+    const side = k => { const t=T(r,k), nb=B(r,k); return t==='t' || t==='s' || (nb && !LIGHT.has(nb)); };
+    if (side(c-1) || side(c+1)) return true;
+    return 'La viga necesita algo abajo o una pieza firme pegada al lado.';
+  }
+  return '¡Nada flota! Ponlo encima del suelo o de una pieza firme.';
+}
+
+function buildGrid(){
+  S.grid = [];
+  for (let r=0;r<ROWS;r++) for (let c=0;c<COLS;c++) S.grid.push({t:COLSPEC[c][r], b:null, fixed:false});
+  S.problem.fixed.forEach(([id,r,c]) => { const cell = S.grid[idx(r,c)]; cell.b = id; cell.fixed = true; });
 }
 
 function startBuild(){
-  S.grid = MAP.join('').split('').map(t => ({t, b:null}));
-  S.left = S.budget; S.stock = {...STOCK}; S.time = 300; S.sel = null; S.tests = 0; S.busy = false;
-  $('#coins-total').textContent = S.budget;
+  buildGrid();
+  S.stock = {...S.problem.stock}; S.sel = null; S.tests = 0; S.busy = false; S.history = [];
+  S.time = S.cond.id==='prisa' ? 180 : 300;
+  S.F = Math.min(S.problem.flood ?? WATER_LEVEL, WATER_LEVEL) - (S.cond.id==='lluvia' ? 1 : 0);
   $('#m-icon').textContent = S.problem.icon; $('#m-field').textContent = S.problem.field; $('#m-title').textContent = S.problem.title;
-  $('#m-hint').textContent = S.problem.hint;
-  $('#d-hint').open = false; $('#d-rules').open = false;
-  $('#report').hidden = true;
+  $('#m-cicon').textContent = S.cond.icon; $('#m-cname').textContent = S.cond.name; $('#m-ctext').textContent = S.cond.text;
+  $('#m-hint').textContent = S.problem.hint; $('#par').textContent = S.problem.par;
+  $('#r-span').textContent = maxSpan(); $('#r-wind').textContent = windMin();
+  $('#d-hint').open = false; $('#d-rules').open = false; $('#report').hidden = true;
+
   gridEl.innerHTML = '';
-  S.grid.forEach((c,i) => {
-    const r = Math.floor(i/COLS);
+  S.grid.forEach((cell,i) => {
+    const r = Math.floor(i/COLS), c = i%COLS;
     const el = document.createElement('button');
-    el.className = 'tile '+c.t + (c.t==='t' && T(r-1,i%COLS)==='a' ? ' top' : '');
-    el.setAttribute('aria-label', `Fila ${r+1}, columna ${i%COLS+1}: ${TERRAIN[c.t]}`);
-    if (c.t==='t' || c.t==='l') { el.disabled = true; el.tabIndex = -1; }
+    el.className = 'tile ' + cell.t + ((cell.t==='t' || cell.t==='s') && !solidT(r-1,c) ? ' top' : '');
+    el.setAttribute('aria-label', `Fila ${r+1}, columna ${c+1}: ${TERRAIN[cell.t]}`);
+    if (solidT(r,c)) { el.disabled = true; el.tabIndex = -1; }
     el.addEventListener('click', () => tapTile(i));
     gridEl.appendChild(el);
   });
-  showTip('Primero planeen: lean la misión y miren la bodega. Luego elijan un bloque abajo y tóquenlo en la isla.');
+  if (S.F < WATER_LEVEL) {
+    const f = document.createElement('div'); f.className = 'flood'; f.id = 'flood';
+    f.style.top = `calc(var(--tile) * ${S.F})`; f.innerHTML = '<span>Hasta aquí sube el agua</span>';
+    gridEl.appendChild(f);
+  }
+
+  paletteEl.innerHTML = '';
+  Object.keys(S.stock).forEach(id => {
+    const b = BLOCKS[id], el = document.createElement('button');
+    el.className = 'chip'; el.dataset.id = id; el.id = 'chip-'+id;
+    el.innerHTML = `<span class="stock" id="stock-${id}"></span>${brickHTML(b.color,b.icon)}<span class="name">${b.name}</span><span class="where">${WHERE_LABEL[b.where]}</span>`;
+    el.addEventListener('click', () => {
+      if (S.busy) return;
+      S.sel = id; tone(660,.05); renderPalette();
+      showTip(`${b.name}: va ${WHERE_LABEL[b.where]}. ${S.stock[id]===0 ? '¡No quedan en la bodega!' : `Quedan ${S.stock[id]}.`} Los cuadros punteados muestran dónde cabe.`);
+    });
+    paletteEl.appendChild(el);
+  });
+
+  showTip('Exploren el mapa, lean la misión y planeen. Luego elijan una pieza abajo y tóquenla en la isla.');
   go('build');
+  $('#board-scroll').scrollLeft = 0;
   renderAll();
-  S.timer = setInterval(() => { S.time--; renderTimer(); if (S.time <= 0) { stopBuildTimer(); runTest(true); } }, 1000);
+  startTimer();
 }
+function startTimer(){ stopBuildTimer(); S.timer = setInterval(() => { S.time--; renderTimer(); if (S.time <= 0) { stopBuildTimer(); runTest(true); } }, 1000); }
 function stopBuildTimer(){ clearInterval(S.timer); S.timer = null; }
 
 function tapTile(i){
   if (S.busy) return;
-  const c = S.grid[i], r = Math.floor(i/COLS), col = i%COLS;
-  if (c.t==='t' || c.t==='l') return;
-  if (c.b) {
-    if (B(r-1,col)) { showTip('Primero quita lo que está encima. ¡Si no, se cae!'); tone(180,.12,'sawtooth'); return; }
-    const b = BLOCKS[c.b];
-    S.left += b.price; S.stock[c.b]++;
-    showTip(`Quitaste ${b.name.toLowerCase()}. Volvió a la bodega y te devolvieron ${b.price} 🪙.`);
-    c.b = null; tone(260,.08); renderAll(); return;
+  const cell = S.grid[i], r = Math.floor(i/COLS), c = i%COLS;
+  if (solidT(r,c)) return;
+  if (cell.b) {
+    if (cell.fixed) { showTip(`${FIXED[cell.b].name}: ya estaba en la isla y no se puede quitar.`); return; }
+    const above = B(r-1,c);
+    if (above && above!=='cable') { showTip('Primero quita lo que está encima. ¡Si no, se cae!'); tone(180,.12,'sawtooth'); return; }
+    S.history.push({i, b:cell.b, op:'remove'});
+    S.stock[cell.b]++; showTip(`Quitaste ${BLOCKS[cell.b].name.toLowerCase()}. Volvió a la bodega.`);
+    cell.b = null; tone(260,.08); renderAll(); return;
   }
-  if (!S.sel) { showTip('Primero elige un bloque de la fila de abajo.'); return; }
-  const b = BLOCKS[S.sel], ok = canPlace(i, S.sel);
+  if (!S.sel) { showTip('Primero elige una pieza de la fila de abajo.'); return; }
+  const b = BLOCKS[S.sel];
+  if (S.stock[S.sel] <= 0) { showTip(`No quedan más piezas de ${b.name.toLowerCase()} en la bodega. Busquen otra forma.`); tone(150,.18,'sawtooth'); return; }
+  const ok = canPlace(i, S.sel);
   if (ok !== true) { showTip(ok); tone(180,.12,'sawtooth'); return; }
-  if (S.stock[S.sel] <= 0) { showTip(`No quedan más ${b.name.toLowerCase()} en la bodega. Busca otra forma de construirlo.`); tone(150,.18,'sawtooth'); return; }
-  if (b.price > S.left) { showTip('¡No te alcanzan las monedas! Quita algo o busca una solución más barata.'); tone(150,.18,'sawtooth'); const coins=$('#coins'); coins.classList.remove('shake'); void coins.offsetWidth; coins.classList.add('shake'); return; }
-  c.b = S.sel; S.left -= b.price; S.stock[S.sel]--; tone(880,.06); tone(1320,.05,'square',.05);
+  cell.b = S.sel; S.stock[S.sel]--; S.history.push({i, b:S.sel, op:'place'});
+  tone(880,.06); tone(1320,.05,'square',.05);
   renderAll();
 }
+$('#btn-undo').addEventListener('click', () => {
+  if (S.busy) return;
+  const h = S.history.pop();
+  if (!h) { showTip('No hay nada que deshacer.'); return; }
+  const cell = S.grid[h.i];
+  if (h.op==='place') { if (cell.b===h.b) { cell.b = null; S.stock[h.b]++; } }
+  else if (!cell.b) { cell.b = h.b; S.stock[h.b]--; }
+  tone(400,.06); showTip('Deshiciste la última jugada.'); renderAll();
+});
 
 function renderAll(){
-  S.grid.forEach((c,i) => {
-    const el = gridEl.children[i], want = c.b || '';
-    if (el.dataset.b !== want) { el.dataset.b = want; el.innerHTML = c.b ? brickHTML(BLOCKS[c.b].color, BLOCKS[c.b].icon) : ''; }
+  const comp = network(), on = poweredComps(comp);
+  S.grid.forEach((cell,i) => {
+    const el = gridEl.children[i];
+    const lit = cell.b && CONDUCT.has(cell.b) && on.has(comp[i]);
+    const want = (cell.b||'') + (lit?'*':'');
+    if (el.dataset.b !== want) {
+      el.dataset.b = want;
+      if (!cell.b) el.innerHTML = '';
+      else {
+        const d = BLOCKS[cell.b] || FIXED[cell.b];
+        const cls = [cell.fixed?'fixed':'', cell.b==='cable'?'cable':'', lit?'on':'', cell.b==='viga'?'thin':''].filter(Boolean).join(' ');
+        el.innerHTML = brickHTML(d.color, d.icon, cls);
+      }
+      el.setAttribute('aria-label', `Fila ${Math.floor(i/COLS)+1}, columna ${i%COLS+1}: ${cell.b ? (BLOCKS[cell.b]||FIXED[cell.b]).name : TERRAIN[cell.t]}`);
+    }
   });
   renderPalette(); renderTimer();
-  $('#coins-left').textContent = S.left;
-  const reqs = S.problem.check();
+  $('#used').textContent = usedCount();
+  const reqs = S.problem.check(ctx());
   $('#checklist').innerHTML = reqs.map(r => `<li class="${r.ok?'ok':''}">${r.t}</li>`).join('');
 }
+function ctx(){ return {F:S.F, walk:() => walkPath(S.problem.walk, S.F)}; }
 function renderPalette(){
   [...paletteEl.children].forEach(el => {
     const id = el.dataset.id;
     el.classList.toggle('sel', id === S.sel);
-    el.classList.toggle('cant', BLOCKS[id].price > S.left || S.stock[id] <= 0);
+    el.classList.toggle('cant', S.stock[id] <= 0);
     $('#stock-'+id).textContent = '×'+S.stock[id];
   });
-  S.grid.forEach((c,i) => gridEl.children[i].classList.toggle('hint-ok', !!S.sel && !c.b && canPlace(i, S.sel) === true));
+  S.grid.forEach((cell,i) => gridEl.children[i].classList.toggle('hint-ok', !!S.sel && !S.busy && !cell.b && canPlace(i, S.sel) === true));
 }
 function renderTimer(){ const t=$('#timer'); t.textContent = '⏱ '+fmt(Math.max(0,S.time)); t.classList.toggle('low', S.time <= 30); }
 function showTip(text){ tipEl.textContent = text; }
 
-/* Physics test: gravity, beam spans, wind on thin towers */
-function physics(){
-  const gone = new Map();
-  const solid = (r,c) => r>=ROWS || T(r,c)==='t' || T(r,c)==='l';
+/* Physics */
+function simulate(){
+  const gone = new Map(), stages = [];
   const occ = (r,c) => inside(r,c) && !!B(r,c) && !gone.has(idx(r,c));
-  for (let pass=0; pass<12; pass++){
+  function supported(){
     const sup = new Set();
+    S.grid.forEach((c,i) => { if (c.fixed && !gone.has(i)) sup.add(i); });
+    const carries = (r,c) => solidT(r,c) || (occ(r,c) && sup.has(idx(r,c)) && !NOSUPPORT.has(B(r,c)));
+    const sideAnchor = (r,c) => { const t = T(r,c); return t==='t' || t==='s' || (occ(r,c) && sup.has(idx(r,c)) && !LIGHT.has(B(r,c))); };
     let changed = true;
     while (changed){
       changed = false;
       for (let r=ROWS-1; r>=0; r--) for (let c=0; c<COLS; c++){
         const i = idx(r,c);
-        if (!occ(r,c) || sup.has(i)) continue;
-        if (solid(r+1,c) || sup.has(idx(r+1,c))) { sup.add(i); changed = true; }
+        if (!occ(r,c) || sup.has(i) || B(r,c)==='cable') continue;
+        if (carries(r+1,c)) { sup.add(i); changed = true; }
       }
       for (let r=0; r<ROWS; r++){
         let c = 0;
         while (c < COLS){
           if (!(occ(r,c) && B(r,c)==='viga')) { c++; continue; }
           let e = c; while (e+1<COLS && occ(r,e+1) && B(r,e+1)==='viga') e++;
-          const run = []; for (let k=c; k<=e; k++) run.push(k);
-          if (!run.every(k => sup.has(idx(r,k)))){
-            const anchors = run.filter(k => solid(r+1,k) || sup.has(idx(r+1,k)));
-            if (c-1>=0 && occ(r,c-1) && sup.has(idx(r,c-1))) anchors.unshift(c-1);
-            if (e+1<COLS && occ(r,e+1) && sup.has(idx(r,e+1))) anchors.push(e+1);
-            const ok = anchors.length && anchors[0] <= c && anchors[anchors.length-1] >= e &&
-              anchors.every((a,k) => k===0 || a - anchors[k-1] - 1 <= 2);
-            if (ok) { run.forEach(k => sup.add(idx(r,k))); changed = true; }
+          let all = true; for (let k=c;k<=e;k++) if (!sup.has(idx(r,k))) all = false;
+          if (!all){
+            const anchors = [];
+            if (sideAnchor(r,c-1)) anchors.push(c-1);
+            for (let k=c;k<=e;k++) if (carries(r+1,k)) anchors.push(k);
+            if (sideAnchor(r,e+1)) anchors.push(e+1);
+            const ok = anchors.length > 0 &&
+              anchors.every((a,k) => k===0 || a - anchors[k-1] - 1 <= maxSpan()) &&
+              anchors[0] - c <= 1 && e - anchors[anchors.length-1] <= 1;
+            if (ok) { for (let k=c;k<=e;k++) sup.add(idx(r,k)); changed = true; }
           }
           c = e+1;
         }
       }
+      for (let r=0; r<ROWS; r++) for (let c=0; c<COLS; c++){
+        const i = idx(r,c);
+        if (!occ(r,c) || sup.has(i) || B(r,c)!=='cable') continue;
+        for (const [dr,dc] of [[-1,-1],[-1,0],[-1,1],[0,-1],[0,1],[1,-1],[1,0],[1,1]]){
+          const rr=r+dr, cc=c+dc, t=T(rr,cc);
+          if (t==='t' || t==='s' || (occ(rr,cc) && sup.has(idx(rr,cc)) && B(rr,cc)!=='cable')) { sup.add(i); changed = true; break; }
+        }
+      }
     }
-    let fell = false;
-    S.grid.forEach((cell,i) => { if (cell.b && !gone.has(i) && !sup.has(i)) { gone.set(i, cell.b==='viga' ? 'span' : 'below'); fell = true; } });
-    if (fell) continue;
-    for (let c=0; c<COLS; c++){
-      let base = ROWS-1; while (base>=0 && solid(base,c)) base--;
-      let top = base; while (top>=0 && occ(top,c)) top--;
-      const h = base - top;
-      if (h >= 4 && !occ(base,c-1) && !occ(base,c+1)) { for (let r=base; r>top; r--) gone.set(idx(r,c), 'wind'); fell = true; }
-    }
-    if (!fell) break;
+    return sup;
   }
-  return gone;
+  function cascade(stage){
+    for (;;){
+      const sup = supported(); let n = 0;
+      S.grid.forEach((c,i) => { if (c.b && !gone.has(i) && !sup.has(i)) { gone.set(i, c.b==='viga' ? 'span' : 'below'); stage.gone.push(i); stage.why.add(c.b==='viga' ? 'span' : 'below'); n++; } });
+      if (!n) break;
+    }
+  }
+  const mark = (stage, i, why) => { gone.set(i, why); stage.gone.push(i); stage.why.add(why); };
+
+  const s1 = {key:'peso', icon:'🚛', name:'Peso y apoyos', gone:[], why:new Set()};
+  S.grid.forEach((c,i) => {
+    const r = Math.floor(i/COLS), col = i%COLS;
+    if (c.b && !c.fixed && !SINK_EXEMPT.has(c.b) && soft(r+1,col)) mark(s1, i, 'soft');
+  });
+  cascade(s1); stages.push(s1);
+
+  const s2 = {key:'viento', icon:'💨', name:'Viento', gone:[], why:new Set()};
+  for (let c=0; c<COLS; c++){
+    let r = ROWS-1; while (r>=0 && solidT(r,c)) r--;
+    const stack = []; for (let k=r; k>=0 && occ(k,c) && B(k,c)!=='cable'; k--) stack.push(k);
+    if (stack.length < windMin() || stack.some(k => isFixed(idx(k,c)))) continue;
+    const braced = stack.some(k => [c-1,c+1].some(cc => { const t = T(k,cc); return t==='t' || t==='s' || (occ(k,cc) && !LIGHT.has(B(k,cc))); }));
+    if (!braced) stack.forEach(k => mark(s2, idx(k,c), 'wind'));
+  }
+  cascade(s2); stages.push(s2);
+
+  const s3 = {key:'agua', icon:'🌊', name:'Agua', gone:[], why:new Set()};
+  S.grid.forEach((c,i) => { if (c.b && !gone.has(i) && !c.fixed && Math.floor(i/COLS) >= S.F && !WATERPROOF.has(c.b)) mark(s3, i, 'flood'); });
+  cascade(s3); stages.push(s3);
+  return {gone, stages};
 }
 
 const REASONS = {
-  span:'Unas vigas se cayeron: más de 2 vigas seguidas sin nada abajo no aguantan el peso del camión. Pongan un pilar o un apoyo.',
-  wind:'El viento tumbó una torre delgada. Pónganle un bloque pegado en la base para que sea más ancha.',
-  below:'Algunos bloques se cayeron porque lo que tenían abajo se derrumbó.'
+  soft:'Algo pesado se hundió en suelo blando. Pongan un cimiento debajo.',
+  span:() => `Unas vigas se cayeron: entre apoyos solo aguantan ${maxSpan()} ${maxSpan()===1?'casilla':'casillas'} sin nada abajo, y 1 en la punta. Usen pilares.`,
+  below:'Algunas piezas se cayeron porque lo de abajo se derrumbó.',
+  wind:'El viento tumbó una columna delgada. Péguenle otra pieza a un lado para amarrarla.',
+  flood:'El agua dañó piezas por debajo de la línea azul. Súbanlas con pilares.'
 };
-function runTest(timeout){
+const reasonText = k => typeof REASONS[k]==='function' ? REASONS[k]() : REASONS[k];
+
+async function runTest(timeout){
   if (S.busy) return;
-  S.busy = true; S.tests++;
-  stopBuildTimer();
-  const gone = physics();
-  gone.forEach((_, i) => { const br = gridEl.children[i].querySelector('.brick'); if (br) br.classList.add('falling'); });
-  if (gone.size) { tone(200,.3,'sawtooth'); tone(120,.4,'sawtooth',.2); }
-  else S.grid.forEach((c,i) => { if (c.b) { const br = gridEl.children[i].querySelector('.brick'); br && br.classList.add('wobble'); } });
-  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  setTimeout(() => {
-    let refund = 0;
-    gone.forEach((_, i) => { const id = S.grid[i].b; refund += Math.floor(BLOCKS[id].price/2); S.stock[id]++; S.grid[i].b = null; });
-    S.left += refund;
-    S.busy = false;
+  S.busy = true; S.tests++; stopBuildTimer(); renderPalette();
+  const fast = reducedMotion();
+  const {gone, stages} = simulate();
+  const report = $('#report'), list = $('#report-list');
+  report.hidden = false; report.className = 'panel report run';
+  $('#report-title').textContent = `Prueba ${S.tests} en curso…`;
+  list.innerHTML = '';
+  report.scrollIntoView({behavior: fast?'auto':'smooth', block:'start'});
+  await sleep(fast ? 100 : 500);
+
+  for (const st of stages){
+    if (st.key==='agua') {
+      const f = $('#flood');
+      if (f) { f.classList.remove('rising'); void f.offsetWidth; f.classList.add('rising'); }
+    }
+    if (st.key==='viento' && !fast) S.grid.forEach((c,i) => { if (c.b && !gone.has(i)) { const br = gridEl.children[i].querySelector('.brick'); br && br.classList.add('wobble'); } });
+    st.gone.forEach(i => { const br = gridEl.children[i].querySelector('.brick'); br && br.classList.add('falling'); });
+    if (st.gone.length) { tone(200,.3,'sawtooth'); tone(120,.4,'sawtooth',.2); } else tone(660,.08,'triangle');
+    const li = document.createElement('li');
+    li.innerHTML = `<span class="st">${st.icon}</span><span>${st.name}: ${st.gone.length ? `se ${st.gone.length===1?'cayó 1 pieza':`cayeron ${st.gone.length} piezas`} ❌` : 'todo bien ✅'}${[...st.why].map(k => `<small>${reasonText(k)}</small>`).join('')}</span>`;
+    list.appendChild(li);
+    await sleep(fast ? 100 : 1000);
+    st.gone.forEach(i => { S.stock[S.grid[i].b]++; S.grid[i].b = null; });
+    S.grid.forEach((c,i) => { const br = gridEl.children[i].querySelector('.brick.wobble'); br && br.classList.remove('wobble'); });
     renderAll();
-    const reqs = S.problem.check(), solved = reqs.every(r => r.ok);
-    if (solved || timeout) { finish(solved, timeout); return; }
-    const reasons = [...new Set(gone.values())].map(k => REASONS[k]);
-    const missing = reqs.filter(r => !r.ok).map(r => 'Falta: ' + r.t.charAt(0).toLowerCase() + r.t.slice(1) + '.');
-    $('#report').hidden = false;
-    $('#report').classList.toggle('good', !gone.size);
-    $('#report-title').textContent = gone.size ? `Prueba ${S.tests}: se cayeron ${gone.size} ${gone.size===1?'bloque':'bloques'}` : `Prueba ${S.tests}: todo quedó de pie`;
-    $('#report-list').innerHTML = [...reasons, ...missing].map(t => `<li>${t}</li>`).join('');
-    showTip(gone.size ? `Las piezas volvieron a la bodega, pero solo les devolvieron ${refund} 🪙. Mejoren el diseño y prueben otra vez.` : 'Su construcción es firme, pero la misión no está completa. ¡Sigan!');
-    $('#report').scrollIntoView({behavior: reduced ? 'auto' : 'smooth', block:'center'});
-    S.timer = setInterval(() => { S.time--; renderTimer(); if (S.time <= 0) { stopBuildTimer(); runTest(true); } }, 1000);
-  }, (gone.size && !reduced) ? 1000 : 600);
+  }
+  const f = $('#flood'); f && f.classList.remove('rising');
+
+  if (S.problem.walk){
+    const w = walkPath(S.problem.walk, S.F);
+    const li = document.createElement('li');
+    li.innerHTML = `<span class="st">${S.problem.walk.who}</span><span>Caminata: …</span>`;
+    list.appendChild(li);
+    const walker = document.createElement('div'); walker.className = 'walker'; walker.textContent = S.problem.walk.who;
+    gridEl.appendChild(walker);
+    for (const k of w.path){
+      walker.style.left = `calc(var(--tile) * ${k%COLS})`; walker.style.top = `calc(var(--tile) * ${Math.floor(k/COLS)})`;
+      tone(500 + (k%COLS)*20, .04, 'triangle');
+      await sleep(fast ? 20 : 260);
+    }
+    li.lastChild.innerHTML = w.ok ? 'Caminata: ¡llegó! ✅' : 'Caminata: no pudo pasar ❌<small>Revisen dónde se quedó: necesita piso firme, subir de a 1 casilla y no mojarse.</small>';
+    await sleep(fast ? 100 : 700);
+    walker.remove();
+  }
+
+  S.history = [];
+  S.busy = false;
+  renderAll();
+  const reqs = S.problem.check(ctx()), solved = reqs.every(r => r.ok);
+  if (solved || timeout) { finish(solved, timeout); return; }
+  const missing = reqs.filter(r => !r.ok);
+  report.className = 'panel report' + (gone.size ? '' : ' good');
+  $('#report-title').textContent = gone.size ? `Prueba ${S.tests}: algo falló` : `Prueba ${S.tests}: todo quedó firme`;
+  missing.forEach(r => { const li = document.createElement('li'); li.innerHTML = `<span class="st">📋</span><span>Falta: ${r.t.charAt(0).toLowerCase()+r.t.slice(1)}.</span>`; list.appendChild(li); });
+  showTip(gone.size ? 'Las piezas que se cayeron volvieron a la bodega. Mejoren el diseño y prueben otra vez.' : 'Su construcción es firme, pero la misión no está completa. ¡Sigan!');
+  startTimer();
 }
 $('#btn-test').addEventListener('click', () => runTest(false));
 $('#btn-exit-build').addEventListener('click', () => go('home'));
@@ -768,14 +987,13 @@ $('#btn-exit-build').addEventListener('click', () => go('home'));
 const STAR = '<svg class="star{on}" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" stroke="#1d2433" stroke-width="1.2" d="M12 2.5l2.9 6 6.6.8-4.9 4.6 1.3 6.5L12 17.2l-5.9 3.2 1.3-6.5L2.5 9.3l6.6-.8z"/></svg>';
 function finish(solved, timeout){
   stopBuildTimer();
-  const reqs = S.problem.check();
-  const stars = [solved, solved && S.tests===1, solved && S.left >= 2];
+  const reqs = S.problem.check(ctx()), used = usedCount();
+  const stars = [solved, solved && S.tests===1, solved && used <= S.problem.par];
   $('#stars').innerHTML = stars.map(on => STAR.replace('{on}', on?' on':'')).join('');
   $('#stars').setAttribute('aria-label', `${stars.filter(Boolean).length} de 3 estrellas`);
   $('#res-title').textContent = solved ? '¡Isla salvada!' : (timeout ? '¡Se acabó el tiempo!' : '¡Casi lo logran!');
-  const spent = S.budget - S.left;
-  $('#res-sub').textContent = (solved ? `Lo lograron en ${S.tests===1?'la primera prueba':`${S.tests} pruebas`}. ` : '') +
-    `Gastaron ${spent} de ${S.budget} monedas y les ${S.left===1?'sobró 1 moneda':`sobraron ${S.left}`}.` + (solved ? '' : ' Esto faltó:');
+  $('#res-sub').textContent = (solved ? `Lo lograron en ${S.tests===1?'la primera prueba':`${S.tests} pruebas`}, con la condición “${S.cond.name}”. ` : '') +
+    `Usaron ${used} ${used===1?'pieza':'piezas'} (la meta era ${S.problem.par} o menos).` + (solved ? '' : ' Esto faltó:');
   $('#res-list').innerHTML = reqs.map(r => `<li class="${r.ok?'ok':'no'}">${r.t}</li>`).join('');
   $('#res-field').textContent = S.problem.field;
   $('#res-about').textContent = S.problem.about;
@@ -784,7 +1002,7 @@ function finish(solved, timeout){
   else { tone(330,.15,'triangle'); tone(262,.25,'triangle',.15); }
 }
 function celebrate(){
-  if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  if (reducedMotion()) return;
   const box = $('#confetti'), colors = ['#e3342f','#ffcd1f','#1f6fd1','#2e9e44','#f08a24','#ffffff'];
   box.innerHTML = Array.from({length:36}, () => `<i style="left:${Math.random()*100}%;background:${colors[Math.floor(Math.random()*colors.length)]};animation-duration:${1.8+Math.random()*1.6}s;animation-delay:${Math.random()*.6}s"></i>`).join('');
   setTimeout(() => box.innerHTML = '', 4200);
@@ -793,46 +1011,30 @@ $('#btn-retry').addEventListener('click', startBuild);
 $('#btn-new').addEventListener('click', () => go('draw'));
 
 /* Real Lego mode */
-const L = {problem:null, budget:null, counts:{}, time:300, timer:null};
-const ldeckP = $('#ldeck-p'), ldeckB = $('#ldeck-b');
+const L = {problem:null, cond:null, time:300, full:300, timer:null};
+const ldeckP = $('#ldeck-p'), ldeckC = $('#ldeck-c');
 function newLegoCards(){
-  L.problem = pick(PROBLEMS, L.problem); L.budget = pick(LEGO_BUDGETS);
-  ldeckP.classList.remove('flipped'); ldeckB.classList.remove('flipped');
-  $('#lego-goal').hidden = true;
+  L.problem = pick(PROBLEMS, L.problem); L.cond = pick(CONDS);
+  ldeckP.classList.remove('flipped'); ldeckC.classList.remove('flipped');
+  $('#lego-goal').hidden = true; $('#lego-cond-box').hidden = true;
   setTimeout(() => {
-    $('#lfront-p').innerHTML = problemFront(L.problem); $('#lfront-b').innerHTML = budgetFront(L.budget.amt, L.budget);
+    $('#lfront-p').innerHTML = problemFront(L.problem); $('#lfront-c').innerHTML = condFront(L.cond);
     $('#lego-goal-text').textContent = L.problem.lego; $('#lego-test-text').textContent = L.problem.test;
+    $('#lego-cond-text').textContent = L.cond.lego;
   }, 250);
-  L.counts = {}; renderPrices(); resetLego();
+  L.full = 300; resetLego();
 }
 setupDeck(ldeckP, () => { $('#lego-goal').hidden = false; });
-setupDeck(ldeckB, renderPrices);
-
-const pricesEl = $('#prices');
-pricesEl.innerHTML = LEGO_PRICES.map(p => `<div class="price-row">${brickHTML(p.color)}<div class="txt"><b>${p.name} <span class="pricetag">🪙 ${p.price}</span></b><span>${p.desc}</span></div>
-  <div class="stepper"><button data-d="-1" data-id="${p.id}" aria-label="Quitar ${p.name}">−</button><output id="cnt-${p.id}">0</output><button data-d="1" data-id="${p.id}" aria-label="Agregar ${p.name}">+</button></div></div>`).join('');
-pricesEl.addEventListener('click', e => {
-  const b = e.target.closest('button[data-id]'); if (!b) return;
-  const id = b.dataset.id; L.counts[id] = Math.max(0, (L.counts[id]||0) + Number(b.dataset.d));
-  tone(b.dataset.d === '1' ? 880 : 300, .05); renderPrices();
+setupDeck(ldeckC, () => {
+  $('#lego-cond-box').hidden = !L.cond.lego;
+  L.full = L.cond.id==='prisa' ? 180 : 300; resetLego();
 });
-function renderPrices(){
-  let spent = 0;
-  LEGO_PRICES.forEach(p => { const n = L.counts[p.id]||0; spent += n*p.price; $('#cnt-'+p.id).textContent = n; });
-  $('#l-spent').textContent = spent;
-  const left = $('#l-left');
-  if (!ldeckB.classList.contains('flipped')) { left.textContent = 'Saquen la carta de presupuesto'; left.className = ''; return; }
-  const rest = L.budget.amt - spent;
-  left.textContent = rest >= 0 ? `Quedan ${rest} de ${L.budget.amt} 🪙` : `¡Se pasaron por ${-rest} 🪙!`;
-  left.className = rest >= 0 ? '' : 'over';
-}
-
 function renderLegoTimer(){ const t=$('#ltimer'); t.textContent = fmt(L.time); t.classList.toggle('low', L.time <= 30); }
-function pauseLego(){ clearInterval(L.timer); L.timer = null; $('#lt-start').textContent = L.time < 300 && L.time > 0 ? 'Seguir' : 'Empezar'; }
-function resetLego(){ pauseLego(); L.time = 300; $('#lt-start').textContent = 'Empezar'; renderLegoTimer(); }
+function pauseLego(){ clearInterval(L.timer); L.timer = null; $('#lt-start').textContent = L.time < L.full && L.time > 0 ? 'Seguir' : 'Empezar'; }
+function resetLego(){ pauseLego(); L.time = L.full; $('#lt-start').textContent = 'Empezar'; renderLegoTimer(); }
 $('#lt-start').addEventListener('click', () => {
   if (L.timer) { pauseLego(); return; }
-  if (L.time <= 0) L.time = 300;
+  if (L.time <= 0) L.time = L.full;
   tone(660,.1,'triangle');
   $('#lt-start').textContent = 'Pausar';
   L.timer = setInterval(() => { L.time--; renderLegoTimer();
@@ -840,5 +1042,6 @@ $('#lt-start').addEventListener('click', () => {
 });
 $('#lt-reset').addEventListener('click', resetLego);
 $('#btn-lnew').addEventListener('click', newLegoCards);
+
 })();
 </script>
