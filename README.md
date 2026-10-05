@@ -5,7 +5,7 @@ Juego para niñas y niños de 8 a 12 años sobre **por qué estudiar ingeniería
 1. Saca una carta de **problema** (puente caído, río sucio, casas sin luz…).
 2. Saca una carta de **presupuesto** (monedas).
 3. Construye la solución con bloques; cada tipo de bloque cuesta distinto.
-4. Al terminar, descubres qué ingeniería usaste (civil, ambiental, sistemas, financiera, ciencia de datos e IA) y ganas hasta 3 estrellas.
+4. Antes de ganar hay que pasar **la prueba**: gravedad, peso del camión sobre las vigas y viento sobre torres delgadas. Lo mal construido se cae. Piezas limitadas en la bodega y 5 minutos.
 
 Tiene dos modos: **en la pantalla** (isla de 8×8 con bloques) y **con Legos de verdad** (la app saca las cartas, cuenta 5 minutos y suma el precio de las piezas).
 
