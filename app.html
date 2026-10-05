@@ -1,0 +1,615 @@
+<title>My Little Island</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Nunito:wght@500;700;800&display=swap">
+<style>
+/* Layout: one-column phone game on an ocean ground; chunky toy-brick buttons, cards and an 8×8 island board. Single bright look by choice. */
+:root{
+  --sea:#1b8bb4; --sea-deep:#0d5f80; --river:#47b4e0; --grass:#74c450; --grass-dark:#5aa83a;
+  --paper:#fffaf0; --ink:#1d2433; --muted:#5b6475;
+  --red:#e3342f; --red-dark:#a91f1b; --yellow:#ffcd1f; --yellow-dark:#c79a00;
+  --green:#2e9e44; --green-dark:#1f6e2f; --white:#ffffff; --white-dark:#c9d3dc;
+  --font-display:'Lilita One','Arial Rounded MT Bold','Trebuchet MS',sans-serif;
+  --font-body:'Nunito','Segoe UI',Roboto,system-ui,sans-serif;
+  color-scheme:light;
+}
+[hidden]{display:none!important}
+*{box-sizing:border-box}
+html,body{min-height:100%}
+body{margin:0;color:var(--ink);font-family:var(--font-body);font-size:16px;line-height:1.45;
+  background-color:var(--sea);
+  background-image:radial-gradient(circle at 20% 30%,rgba(255,255,255,.08) 0 2px,transparent 3px),radial-gradient(circle at 70% 80%,rgba(255,255,255,.06) 0 2px,transparent 3px);
+  background-size:38px 38px,54px 54px;-webkit-tap-highlight-color:transparent}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible{outline:3px solid var(--yellow);outline-offset:3px}
+#app{max-width:480px;margin:0 auto;padding-inline:16px;padding-block:16px 40px}
+.screen{display:flex;flex-direction:column;gap:16px}
+h1,h2,h3{font-family:var(--font-display);font-weight:400;margin:0;text-wrap:balance;letter-spacing:.01em}
+p{margin:0}
+.eyebrow{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+
+/* Home */
+.hero{display:flex;flex-direction:column;align-items:center;text-align:center;gap:8px;padding-top:8px}
+.hero svg{width:100%;max-width:300px;height:auto}
+.logo{color:var(--white);font-size:26px;line-height:1;text-shadow:0 3px 0 var(--sea-deep)}
+.logo span{display:block;font-size:64px;color:var(--yellow);text-shadow:0 4px 0 var(--ink),0 0 0 var(--ink);-webkit-text-stroke:2px var(--ink)}
+.tag{color:var(--white);max-width:34ch;font-weight:700}
+.menu{display:flex;flex-direction:column;gap:14px}
+
+.btn{border:0;border-radius:14px;padding:14px 18px;font-family:var(--font-display);font-size:21px;letter-spacing:.02em;
+  background:var(--b,var(--red));color:var(--bt,var(--white));box-shadow:0 6px 0 var(--bd,var(--red-dark));transition:transform .08s,box-shadow .08s}
+.btn:active{transform:translateY(4px);box-shadow:0 2px 0 var(--bd,var(--red-dark))}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn-yellow{--b:var(--yellow);--bd:var(--yellow-dark);--bt:var(--ink)}
+.btn-green{--b:var(--green);--bd:var(--green-dark)}
+.btn-white{--b:var(--white);--bd:var(--white-dark);--bt:var(--ink)}
+.btn-small{font-size:17px;padding:10px 14px}
+.link{background:none;border:0;color:var(--white);font-weight:800;text-decoration:underline;text-underline-offset:3px;padding:6px}
+
+.bar{display:flex;align-items:center;gap:12px;color:var(--white)}
+.bar h2{font-size:26px;text-shadow:0 3px 0 var(--sea-deep)}
+.backbtn{border:0;background:var(--white);color:var(--ink);width:44px;height:44px;border-radius:12px;font-size:22px;font-weight:800;box-shadow:0 4px 0 var(--white-dark);flex:none}
+.hint{color:var(--white);font-weight:700}
+
+.panel{background:var(--paper);border-radius:18px;padding:16px;display:flex;flex-direction:column;gap:10px;box-shadow:0 6px 0 rgba(0,0,0,.18)}
+.panel h3{font-size:22px}
+.steps{margin:0;padding-left:22px;display:flex;flex-direction:column;gap:8px}
+.steps b{font-weight:800}
+
+/* Decks */
+.decks{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.deck{border:0;background:none;padding:0 0 10px;perspective:900px;position:relative;min-width:0}
+.deck::before,.deck::after{content:"";position:absolute;inset:6px -2px 2px 4px;border-radius:16px;background:var(--pile);z-index:0}
+.deck::after{inset:3px 1px 6px 2px;opacity:.85}
+.deck[data-kind="problem"]{--pile:var(--red-dark)}
+.deck[data-kind="budget"]{--pile:var(--yellow-dark)}
+.card{position:relative;z-index:1;display:block;aspect-ratio:3/4.2;transform-style:preserve-3d;transition:transform .6s cubic-bezier(.3,1.4,.5,1)}
+.deck.flipped .card{transform:rotateY(180deg)}
+.face{position:absolute;inset:0;border-radius:16px;backface-visibility:hidden;-webkit-backface-visibility:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:12px;text-align:center;overflow:hidden}
+.face.back{color:var(--white);font-family:var(--font-display);font-size:20px;letter-spacing:.06em;
+  background-image:radial-gradient(circle,rgba(255,255,255,.22) 0 7px,transparent 8px);background-size:30px 30px;border:4px solid rgba(255,255,255,.75)}
+.face.back.p{background-color:var(--red)}
+.face.back.b{background-color:var(--yellow);color:var(--ink)}
+.face.back small{font-family:var(--font-body);font-weight:800;font-size:12px;letter-spacing:.02em;text-transform:none}
+.face.front{transform:rotateY(180deg);background:var(--paper);border:4px solid var(--edge,var(--red))}
+.deck[data-kind="budget"] .face.front{--edge:var(--yellow)}
+.field{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;background:var(--ink);color:var(--white);border-radius:99px;padding:3px 9px}
+.big{font-size:40px;line-height:1.1}
+.face strong{font-family:var(--font-display);font-weight:400;font-size:19px;line-height:1.1}
+.story{font-size:13px;line-height:1.3;color:var(--muted);font-weight:700}
+.coin{width:74px;height:74px;border-radius:50%;background:var(--yellow);border:5px solid var(--yellow-dark);display:grid;place-items:center;font-family:var(--font-display);font-size:32px;box-shadow:inset 0 -5px 0 rgba(0,0,0,.12)}
+
+/* Build */
+.hud{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;display:flex;gap:8px;padding-block:6px}
+.pill{background:var(--paper);border:0;border-radius:99px;padding:8px 14px;font-weight:800;font-size:17px;display:flex;align-items:center;gap:6px;box-shadow:0 4px 0 rgba(0,0,0,.18);font-variant-numeric:tabular-nums}
+.pill small{font-weight:700;color:var(--muted);font-size:13px}
+.pill.timer{margin-left:auto}
+.pill.low{background:var(--red);color:var(--white)}
+.shake{animation:shake .35s}
+@keyframes shake{25%{transform:translateX(-6px)}50%{transform:translateX(6px)}75%{transform:translateX(-3px)}}
+.mission{gap:6px}
+.mission .row{display:flex;gap:10px;align-items:center}
+.mission .big{font-size:30px}
+.mission h3{font-size:20px;line-height:1.1}
+.checklist{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+.checklist li{display:flex;gap:8px;align-items:flex-start;font-weight:700;font-size:15px}
+.checklist li::before{content:"";flex:none;width:20px;height:20px;margin-top:1px;border-radius:6px;border:3px solid var(--white-dark);background:var(--white)}
+.checklist li.ok{color:var(--green-dark)}
+.checklist li.ok::before{border-color:var(--green);background:var(--green) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath d='M4 10l4 4 8-9' fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/14px no-repeat}
+.checklist li.no{color:var(--red-dark)}
+.checklist li.no::before{border-color:var(--red);background:var(--white)}
+
+.board{background:var(--sea-deep);border-radius:18px;padding:6px;box-shadow:0 6px 0 rgba(0,0,0,.18)}
+.grid{display:grid;grid-template-columns:repeat(8,1fr);gap:2px;aspect-ratio:1;max-width:100%}
+.tile{border:0;padding:0;border-radius:6px;position:relative;min-width:0;display:grid;place-items:center}
+.tile.s{background:transparent;cursor:default}
+.tile.g{background:var(--grass);box-shadow:inset 0 -3px 0 var(--grass-dark)}
+.tile.w{background:var(--river);box-shadow:inset 0 -3px 0 rgba(0,0,0,.12);background-image:repeating-linear-gradient(160deg,rgba(255,255,255,.18) 0 3px,transparent 3px 10px)}
+.tile.hint-ok{outline:2px dashed rgba(255,255,255,.85);outline-offset:-4px}
+
+.brick{--c:var(--red);position:relative;display:grid;place-items:center;width:84%;height:62%;margin-top:14%;border-radius:4px;background:var(--c);
+  box-shadow:inset 0 -4px 0 rgba(0,0,0,.25),inset 0 2px 0 rgba(255,255,255,.35)}
+.brick::before,.brick::after{content:"";position:absolute;top:-22%;width:26%;aspect-ratio:1/.7;border-radius:40%;background:var(--c);box-shadow:inset 0 -2px 0 rgba(0,0,0,.25),inset 0 1px 0 rgba(255,255,255,.4)}
+.brick::before{left:14%}.brick::after{right:14%}
+.brick .ico{font-size:clamp(12px,4.2vw,20px);line-height:1;filter:drop-shadow(0 1px 0 rgba(0,0,0,.25))}
+.tile .brick{animation:drop .22s ease-out}
+@keyframes drop{from{transform:translateY(-30%) scale(1.1);opacity:.4}}
+
+.palette-wrap{overflow-x:auto;margin-inline:-16px;padding-inline:16px;scrollbar-width:thin}
+.palette{display:flex;gap:10px;padding-block:6px 10px;width:max-content}
+.chip{border:0;background:var(--paper);border-radius:14px;padding:8px 10px 6px;display:flex;flex-direction:column;align-items:center;gap:2px;width:78px;box-shadow:0 4px 0 rgba(0,0,0,.2);transition:transform .1s}
+.chip .brick{width:46px;height:28px;margin-top:8px}
+.chip .name{font-size:12px;font-weight:800;line-height:1.1}
+.chip .price{font-size:13px;font-weight:800;color:var(--yellow-dark);font-variant-numeric:tabular-nums}
+.chip .where{font-size:10px;font-weight:700;color:var(--muted)}
+.chip.sel{transform:translateY(-4px);outline:4px solid var(--yellow);outline-offset:0}
+.chip.cant{opacity:.45}
+.tip{color:var(--white);font-weight:700;min-height:2.9em;text-align:center}
+.btn.ready{animation:pulse 1.2s infinite}
+@keyframes pulse{50%{transform:scale(1.04)}}
+
+/* Result */
+.result{text-align:center;align-items:center}
+.stars{display:flex;gap:10px;justify-content:center}
+.star{width:54px;height:54px;color:var(--white-dark)}
+.star.on{color:var(--yellow);animation:pop .5s backwards}
+.star.on:nth-child(2){animation-delay:.15s}.star.on:nth-child(3){animation-delay:.3s}
+@keyframes pop{from{transform:scale(0) rotate(-40deg)}}
+.result h2{font-size:32px}
+.result .checklist{align-self:stretch;text-align:left}
+.star-legend{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;font-size:12px;font-weight:700;color:var(--muted);align-self:stretch}
+.engineer{background:var(--ink);color:var(--white);border-radius:14px;padding:14px;align-self:stretch;text-align:left;display:flex;flex-direction:column;gap:4px}
+.engineer .eyebrow{color:var(--yellow)}
+.engineer h3{font-size:24px}
+.badges{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:8px;align-self:stretch;text-align:left}
+.badges li{background:var(--white);border-radius:12px;padding:8px 10px;font-size:13px;font-weight:800;display:flex;gap:8px;align-items:center;box-shadow:inset 0 -3px 0 var(--white-dark)}
+.badges .dot{flex:none;width:14px;height:14px;border-radius:4px;background:var(--c)}
+.confetti{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:20}
+.confetti i{position:absolute;top:-30px;width:16px;height:10px;border-radius:2px;animation:fall linear forwards}
+@keyframes fall{to{transform:translateY(110vh) rotate(540deg)}}
+
+/* Real Lego mode */
+.prices{display:flex;flex-direction:column;gap:8px}
+.price-row{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center}
+.price-row .brick{width:40px;height:24px;margin-top:6px}
+.price-row .txt{min-width:0}
+.price-row .txt b{display:block;font-size:15px}
+.price-row .txt span{font-size:12px;color:var(--muted);font-weight:700}
+.stepper{display:flex;align-items:center;gap:6px;font-variant-numeric:tabular-nums}
+.stepper button{width:36px;height:36px;border-radius:10px;border:0;background:var(--ink);color:var(--white);font-size:20px;font-weight:800}
+.stepper output{min-width:24px;text-align:center;font-weight:800}
+.pricetag{font-size:12px;font-weight:800;color:var(--yellow-dark);white-space:nowrap}
+.total{display:flex;justify-content:space-between;align-items:center;border-top:3px dashed var(--white-dark);padding-top:10px;font-weight:800;font-variant-numeric:tabular-nums}
+.total .over{color:var(--red)}
+.bigtimer{font-family:var(--font-display);font-size:64px;text-align:center;line-height:1;font-variant-numeric:tabular-nums}
+.bigtimer.low{color:var(--red)}
+.rowbtns{display:flex;gap:10px;flex-wrap:wrap}
+.rowbtns .btn{flex:1}
+
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation:none!important;transition:none!important}
+}
+</style>
+
+<main id="app">
+
+<section id="s-home" class="screen">
+  <div class="hero">
+    <svg viewBox="0 0 240 150" role="img" aria-label="Una isla con una casa de bloques y una palmera">
+      <ellipse cx="120" cy="118" rx="112" ry="24" fill="#0d5f80"/>
+      <ellipse cx="120" cy="108" rx="96" ry="26" fill="#f3dca4"/>
+      <ellipse cx="120" cy="100" rx="80" ry="20" fill="#74c450"/>
+      <path d="M108 82 q6 18 -2 36 h20 q-6 -18 2 -36z" fill="#47b4e0"/>
+      <rect x="132" y="66" width="22" height="7" rx="1" fill="#7a4a2a"/>
+      <g>
+        <rect x="58" y="60" width="40" height="30" rx="3" fill="#e3342f"/>
+        <rect x="62" y="55" width="9" height="6" rx="2" fill="#e3342f"/><rect x="76" y="55" width="9" height="6" rx="2" fill="#e3342f"/>
+        <rect x="58" y="84" width="40" height="6" fill="#a91f1b"/>
+        <rect x="64" y="66" width="12" height="11" rx="1" fill="#47b4e0"/>
+        <rect x="82" y="68" width="10" height="16" rx="1" fill="#ffcd1f"/>
+        <path d="M52 58 L78 36 L104 58 Z" fill="#1f6fd1"/>
+      </g>
+      <g>
+        <rect x="166" y="54" width="7" height="40" rx="3" fill="#7a4a2a"/>
+        <path d="M170 56 q-26 -10 -34 4 q14 -6 34 -4z M170 56 q24 -12 34 2 q-14 -4 -34 -2z M170 55 q-6 -22 -22 -24 q12 10 22 24z M170 55 q8 -22 24 -22 q-14 8 -24 22z" fill="#2e9e44"/>
+      </g>
+      <circle cx="210" cy="26" r="13" fill="#ffcd1f"/>
+      <path d="M20 128 q10 -6 20 0 t20 0 M180 132 q10 -6 20 0 t20 0" stroke="#fff" stroke-opacity=".5" stroke-width="3" fill="none" stroke-linecap="round"/>
+    </svg>
+    <h1 class="logo">My Little<span>Island</span></h1>
+    <p class="tag">Saca una carta de problema y una de presupuesto, y construye la solución con bloques. Así trabaja una persona ingeniera.</p>
+  </div>
+  <div class="menu">
+    <button class="btn" data-go="draw" id="btn-play">Jugar en la pantalla</button>
+    <button class="btn btn-yellow" data-go="lego" id="btn-lego">Jugar con Legos de verdad</button>
+    <button class="btn btn-white" data-go="howto" id="btn-howto">¿Cómo se juega?</button>
+    <button class="link" data-go="install" id="btn-install">Poner el juego en mi teléfono</button>
+  </div>
+</section>
+
+<section id="s-howto" class="screen" hidden>
+  <div class="bar"><button class="backbtn" data-go="home" aria-label="Volver">←</button><h2>¿Cómo se juega?</h2></div>
+  <div class="panel">
+    <ol class="steps">
+      <li><b>Saca una carta de problema.</b> La isla tiene algo que arreglar: un puente roto, agua sucia, casas sin luz…</li>
+      <li><b>Saca una carta de presupuesto.</b> Son las monedas que tienes para gastar.</li>
+      <li><b>Construye la solución.</b> Cada bloque cuesta monedas distintas. Si se acaba el dinero, quita algo o busca una idea más barata.</li>
+      <li><b>Revisa tu misión.</b> La lista se va marcando cuando cumples cada parte. Tienes 5 minutos.</li>
+      <li><b>Descubre qué ingeniería usaste</b> y gana hasta 3 estrellas: resolver el problema, terminar a tiempo y ahorrar monedas.</li>
+    </ol>
+  </div>
+  <div class="panel">
+    <h3>Para quien dirige el juego</h3>
+    <p>Para niñas y niños de 8 a 12 años, en equipos de 2 a 4. Dura entre 5 y 10 minutos por ronda. En el modo con Legos de verdad, la app solo saca las cartas, lleva el tiempo y suma lo que cuesta cada pieza.</p>
+  </div>
+</section>
+
+<section id="s-install" class="screen" hidden>
+  <div class="bar"><button class="backbtn" data-go="home" aria-label="Volver">←</button><h2>En tu teléfono</h2></div>
+  <div class="panel">
+    <h3>Android (Chrome)</h3>
+    <p>Abre el menú <b>⋮</b> arriba a la derecha y toca <b>Añadir a la pantalla principal</b>. Ponle el nombre <b>My Little Island</b>.</p>
+  </div>
+  <div class="panel">
+    <h3>iPhone (Safari)</h3>
+    <p>Toca el botón <b>Compartir</b> (el cuadrado con la flecha) y elige <b>Añadir a pantalla de inicio</b>.</p>
+  </div>
+</section>
+
+<section id="s-draw" class="screen" hidden>
+  <div class="bar"><button class="backbtn" data-go="home" aria-label="Volver">←</button><h2>Saca tus cartas</h2></div>
+  <p class="hint">Toca cada montón para voltear su carta.</p>
+  <div class="decks">
+    <button class="deck" data-kind="problem" id="deck-p" aria-label="Voltear carta de problema">
+      <span class="card"><span class="face back p">PROBLEMA<small>¿Qué necesita la isla?</small></span><span class="face front" id="front-p"></span></span>
+    </button>
+    <button class="deck" data-kind="budget" id="deck-b" aria-label="Voltear carta de presupuesto">
+      <span class="card"><span class="face back b">PRESUPUESTO<small>¿Cuánto puedes gastar?</small></span><span class="face front" id="front-b"></span></span>
+    </button>
+  </div>
+  <button class="btn btn-green" id="btn-build" disabled>¡A construir!</button>
+  <button class="link" id="btn-reshuffle">Barajar otras cartas</button>
+</section>
+
+<section id="s-build" class="screen" hidden>
+  <div class="hud">
+    <button class="backbtn" id="btn-exit-build" aria-label="Salir">←</button>
+    <div class="pill" id="coins">🪙 <b id="coins-left">0</b> <small>de <span id="coins-total">0</span></small></div>
+    <div class="pill timer" id="timer">5:00</div>
+  </div>
+  <div class="panel mission">
+    <div class="row"><span class="big" id="m-icon"></span><div><p class="eyebrow" id="m-field"></p><h3 id="m-title"></h3></div></div>
+    <ul class="checklist" id="checklist"></ul>
+  </div>
+  <div class="board"><div class="grid" id="grid"></div></div>
+  <div class="palette-wrap"><div class="palette" id="palette"></div></div>
+  <p class="tip" id="tip">Elige un bloque y toca la isla para ponerlo. Toca un bloque puesto para quitarlo.</p>
+  <button class="btn btn-green" id="btn-done">¡Terminé!</button>
+</section>
+
+<section id="s-result" class="screen" hidden>
+  <div class="panel result">
+    <div class="stars" id="stars"></div>
+    <div class="star-legend"><span>Problema resuelto</span><span>A tiempo</span><span>Ahorraste</span></div>
+    <h2 id="res-title"></h2>
+    <p id="res-sub"></p>
+    <ul class="checklist" id="res-list"></ul>
+    <div class="engineer"><p class="eyebrow">Hoy trabajaste como</p><h3 id="res-field"></h3><p id="res-about"></p></div>
+    <p class="eyebrow">Lo que hace la ingeniería</p>
+    <ul class="badges">
+      <li><span class="dot" style="--c:var(--red)"></span>Resuelve problemas reales</li>
+      <li><span class="dot" style="--c:var(--yellow)"></span>Mejora la vida de las personas</li>
+      <li><span class="dot" style="--c:#1f6fd1"></span>Usa creatividad e inventos</li>
+      <li><span class="dot" style="--c:var(--green)"></span>Trabaja en equipo</li>
+      <li><span class="dot" style="--c:#f08a24"></span>Mezcla ciencia y tecnología</li>
+      <li><span class="dot" style="--c:#8e44ad"></span>Sirve en muchos campos</li>
+    </ul>
+  </div>
+  <div class="menu">
+    <button class="btn btn-green" id="btn-retry">Intentar con las mismas cartas</button>
+    <button class="btn btn-yellow" id="btn-new">Cartas nuevas</button>
+    <button class="btn btn-white" data-go="home">Inicio</button>
+  </div>
+  <div class="confetti" id="confetti" aria-hidden="true"></div>
+</section>
+
+<section id="s-lego" class="screen" hidden>
+  <div class="bar"><button class="backbtn" data-go="home" aria-label="Volver">←</button><h2>Con Legos de verdad</h2></div>
+  <p class="hint">Toca cada montón para voltear su carta. Luego construyan la solución sobre la mesa.</p>
+  <div class="decks">
+    <button class="deck" data-kind="problem" id="ldeck-p" aria-label="Voltear carta de problema">
+      <span class="card"><span class="face back p">PROBLEMA<small>¿Qué necesita la isla?</small></span><span class="face front" id="lfront-p"></span></span>
+    </button>
+    <button class="deck" data-kind="budget" id="ldeck-b" aria-label="Voltear carta de presupuesto">
+      <span class="card"><span class="face back b">PRESUPUESTO<small>¿Cuánto puedes gastar?</small></span><span class="face front" id="lfront-b"></span></span>
+    </button>
+  </div>
+  <div class="panel" id="lego-goal" hidden>
+    <p class="eyebrow">Qué deben construir</p>
+    <p id="lego-goal-text"></p>
+  </div>
+  <div class="panel">
+    <div class="bigtimer" id="ltimer">5:00</div>
+    <div class="rowbtns">
+      <button class="btn btn-green btn-small" id="lt-start">Empezar</button>
+      <button class="btn btn-white btn-small" id="lt-reset">Reiniciar</button>
+    </div>
+  </div>
+  <div class="panel">
+    <h3>Lista de precios</h3>
+    <p class="story">Sumen cada pieza que usen. No pueden pasarse del presupuesto.</p>
+    <div class="prices" id="prices"></div>
+    <div class="total"><span>Gastado: <span id="l-spent">0</span> 🪙</span><span id="l-left"></span></div>
+  </div>
+  <button class="btn btn-yellow" id="btn-lnew">Cartas nuevas</button>
+</section>
+
+</main>
+
+<script>
+(function(){
+const $ = s => document.querySelector(s);
+
+const BLOCKS = {
+  ladrillo:  {name:'Ladrillo',    price:2, color:'#e3342f', icon:'🧱', where:'land'},
+  ventana:   {name:'Ventana',     price:2, color:'#9fd8f5', icon:'🔲', where:'land'},
+  techo:     {name:'Techo',       price:3, color:'#1f6fd1', icon:'🏠', where:'land'},
+  camino:    {name:'Camino',      price:1, color:'#a7adb5', icon:'🛣️', where:'land'},
+  arbol:     {name:'Árbol',       price:1, color:'#2e9e44', icon:'🌳', where:'land'},
+  reciclaje: {name:'Reciclaje',   price:2, color:'#9bd13a', icon:'♻️', where:'land'},
+  panel:     {name:'Panel solar', price:5, color:'#2b2f36', icon:'☀️', where:'land'},
+  computador:{name:'Computador',  price:5, color:'#f3f3f0', icon:'💻', where:'land'},
+  antena:    {name:'Antena',      price:6, color:'#f08a24', icon:'📡', where:'land'},
+  viga:      {name:'Viga',        price:3, color:'#7a4a2a', icon:'🌉', where:'water'},
+  filtro:    {name:'Filtro',      price:5, color:'#3fb8e8', icon:'💧', where:'water'},
+  sensor:    {name:'Sensor',      price:3, color:'#ffcd1f', icon:'📊', where:'water'}
+};
+
+const MAP = ["ssgwwgss","sggwwggs","gggwwggg","gggwwggg","gggwwggg","gggwwggg","sggwwggs","ssgwwgss"];
+const COLS = 8;
+
+const S = {problem:null, tier:null, budget:0, grid:[], sel:null, left:0, time:300, timer:null, solvedOnce:false};
+const at = (r,c) => (S.grid[r*COLS+c]||{}).b;
+const count = id => S.grid.filter(c => c.b === id).length;
+const req = (t, ok) => ({t, ok});
+
+const PROBLEMS = [
+  {id:'puente', field:'Ingeniería civil', icon:'🌉', title:'¡Se cayó el puente!', min:8,
+   story:'Los niños del otro lado del río no pueden llegar a la escuela.',
+   about:'Las ingenieras e ingenieros civiles diseñan puentes, carreteras y edificios seguros para que la gente pueda moverse y vivir tranquila.',
+   lego:'Un puente que una dos orillas (pueden ser dos libros separados) y que aguante un objeto pequeño encima, como un borrador.',
+   check(){ const rows=[0,1,2,3,4,5,6,7].filter(r=>at(r,3)==='viga'&&at(r,4)==='viga');
+     return [req('Un puente de 2 vigas que cruce el río', rows.length>0),
+             req('Un camino a cada lado del puente', rows.some(r=>at(r,2)==='camino'&&at(r,5)==='camino'))]; }},
+  {id:'rio', field:'Ingeniería ambiental', icon:'🐟', title:'El río está sucio', min:10,
+   story:'Los peces se enferman y nadie puede usar el agua.',
+   about:'La ingeniería ambiental cuida el agua, el aire y la tierra. Inventa filtros, plantas de reciclaje y formas de contaminar menos.',
+   lego:'Un filtro o barrera que separe la basura del agua, un punto de reciclaje y al menos 3 árboles cerca del río.',
+   check(){ return [req('1 filtro de agua en el río', count('filtro')>=1),
+                    req('3 árboles para proteger la orilla', count('arbol')>=3),
+                    req('1 punto de reciclaje', count('reciclaje')>=1)]; }},
+  {id:'luz', field:'Ingeniería ambiental y civil', icon:'💡', title:'Las casas no tienen luz', min:17,
+   story:'De noche todo queda a oscuras. Necesitan energía limpia.',
+   about:'Ingenieras e ingenieros diseñan energía que no contamina, como paneles solares y molinos de viento, y la llevan hasta cada casa.',
+   lego:'Una casa con techo y una "granja solar": piezas planas inclinadas hacia el sol, conectadas a la casa.',
+   check(){ return [req('2 paneles solares', count('panel')>=2),
+                    req('Una casa: 2 ladrillos y 1 techo', count('ladrillo')>=2 && count('techo')>=1)]; }},
+  {id:'tormenta', field:'Ingeniería civil', icon:'🌧️', title:'La tormenta dañó las casas', min:18,
+   story:'Dos familias necesitan un hogar nuevo y fuerte.',
+   about:'La ingeniería civil calcula cómo hacer casas que resistan viento, lluvia y temblores, usando bien cada material.',
+   lego:'Dos casas con ventana y techo. Al terminar, soplen fuerte: ¡no se deben caer!',
+   check(){ return [req('4 ladrillos para las paredes', count('ladrillo')>=4),
+                    req('2 techos', count('techo')>=2),
+                    req('2 ventanas', count('ventana')>=2)]; }},
+  {id:'señal', field:'Ingeniería de sistemas', icon:'📵', title:'La isla está incomunicada', min:13,
+   story:'Sin internet, el médico no puede pedir ayuda.',
+   about:'La ingeniería de sistemas conecta computadores, redes y antenas, y crea programas para que la información llegue a quien la necesita.',
+   lego:'Una torre de antena alta (la más alta de la mesa) unida con un camino hasta un edificio con computador.',
+   check(){ return [req('1 antena', count('antena')>=1),
+                    req('1 computador', count('computador')>=1),
+                    req('2 caminos para llegar', count('camino')>=2)]; }},
+  {id:'peces', field:'Ciencia de datos e IA', icon:'🎣', title:'¿Cuántos peces quedan?', min:11,
+   story:'Los pescadores no saben si están pescando demasiado.',
+   about:'La ciencia de datos y la inteligencia artificial miden, cuentan y encuentran patrones para tomar mejores decisiones.',
+   lego:'Sensores (piezas de colores) en el agua y una estación con computador en la orilla que "recibe los datos".',
+   check(){ return [req('2 sensores en el agua', count('sensor')>=2),
+                    req('1 computador para analizar los datos', count('computador')>=1)]; }},
+  {id:'parque', field:'Ingeniería financiera', icon:'🎢', title:'Un parque con poco dinero', min:10,
+   story:'La isla quiere un parque, pero también guardar dinero para el futuro.',
+   about:'La ingeniería financiera ayuda a usar bien el dinero: planear, ahorrar y decidir en qué vale la pena invertir.',
+   lego:'Un parque con árboles y caminos, gastando como máximo la mitad del presupuesto.',
+   check(){ return [req('3 árboles', count('arbol')>=3),
+                    req('2 caminos', count('camino')>=2),
+                    req('Ahorrar al menos 5 monedas', S.left>=5)]; }}
+];
+
+const TIERS = [
+  {name:'Ajustado', bonus:2,  tip:'Cada moneda cuenta. Piensa antes de gastar.'},
+  {name:'Justo',    bonus:5,  tip:'Te alcanza si planeas bien.'},
+  {name:'Cómodo',   bonus:9,  tip:'Puedes agregar algo extra.'},
+  {name:'Generoso', bonus:14, tip:'Resuelve el problema y decora tu isla.'}
+];
+const LEGO_BUDGETS = [
+  {name:'Ajustado', amt:15, tip:'Usen pocas piezas y muy bien pensadas.'},
+  {name:'Justo',    amt:20, tip:'Planeen antes de construir.'},
+  {name:'Cómodo',   amt:25, tip:'Pueden agregar un detalle extra.'},
+  {name:'Generoso', amt:30, tip:'Construyan y decoren la isla.'}
+];
+const LEGO_PRICES = [
+  {id:'s', name:'Pieza pequeña',  desc:'1×1 o 1×2',             price:1, color:'#ffcd1f'},
+  {id:'m', name:'Pieza mediana',  desc:'2×2 o 1×4',             price:2, color:'#2e9e44'},
+  {id:'l', name:'Pieza grande',   desc:'2×4 o más larga',       price:3, color:'#e3342f'},
+  {id:'p', name:'Placa plana',    desc:'Cualquier tamaño',      price:2, color:'#1f6fd1'},
+  {id:'x', name:'Pieza especial', desc:'Ventana, puerta, rueda, planta', price:4, color:'#f08a24'},
+  {id:'f', name:'Muñequito',      desc:'Una persona de Lego',   price:5, color:'#f3f3f0'}
+];
+
+function pick(list, avoid){ let x; do { x = list[Math.floor(Math.random()*list.length)]; } while (list.length>1 && x===avoid); return x; }
+const fmt = s => Math.floor(s/60)+':'+String(s%60).padStart(2,'0');
+const brickHTML = (color, icon) => `<span class="brick" style="--c:${color}">${icon?`<span class="ico">${icon}</span>`:''}</span>`;
+
+let ac;
+function tone(freq, dur, type, delay){
+  try{
+    ac = ac || new (window.AudioContext||window.webkitAudioContext)();
+    const t = ac.currentTime + (delay||0), o = ac.createOscillator(), g = ac.createGain();
+    o.type = type||'square'; o.frequency.value = freq;
+    g.gain.setValueAtTime(0.06, t); g.gain.exponentialRampToValueAtTime(0.0001, t+(dur||0.08));
+    o.connect(g); g.connect(ac.destination); o.start(t); o.stop(t+(dur||0.08)+0.02);
+  }catch(e){}
+}
+
+/* Navigation */
+const screens = ['home','howto','install','draw','build','result','lego'];
+function go(name){
+  if (name !== 'build') stopBuildTimer();
+  if (name !== 'lego') pauseLego();
+  screens.forEach(n => $('#s-'+n).hidden = n !== name);
+  if (name === 'draw') newCards();
+  if (name === 'lego' && !L.problem) newLegoCards();
+  window.scrollTo(0,0);
+}
+document.addEventListener('click', e => { const b = e.target.closest('[data-go]'); if (b) go(b.dataset.go); });
+
+/* Decks */
+const problemFront = p => `<span class="field">${p.field}</span><span class="big">${p.icon}</span><strong>${p.title}</strong><span class="story">${p.story}</span>`;
+const budgetFront = (amt, t) => `<span class="field">${t.name}</span><span class="coin">${amt}</span><strong>monedas</strong><span class="story">${t.tip}</span>`;
+function setupDeck(deck, onFlip){
+  deck.addEventListener('click', () => { if (deck.classList.contains('flipped')) return; deck.classList.add('flipped'); tone(520,.12,'triangle'); onFlip(); });
+}
+
+const deckP = $('#deck-p'), deckB = $('#deck-b');
+function newCards(){
+  S.problem = pick(PROBLEMS, S.problem); S.tier = pick(TIERS);
+  S.budget = S.problem.min + S.tier.bonus;
+  deckP.classList.remove('flipped'); deckB.classList.remove('flipped');
+  setTimeout(() => { $('#front-p').innerHTML = problemFront(S.problem); $('#front-b').innerHTML = budgetFront(S.budget, S.tier); }, 250);
+  $('#btn-build').disabled = true;
+}
+const checkReady = () => { $('#btn-build').disabled = !(deckP.classList.contains('flipped') && deckB.classList.contains('flipped')); };
+setupDeck(deckP, checkReady); setupDeck(deckB, checkReady);
+$('#btn-reshuffle').addEventListener('click', newCards);
+$('#btn-build').addEventListener('click', startBuild);
+
+/* Build */
+const gridEl = $('#grid'), paletteEl = $('#palette'), tipEl = $('#tip');
+const TERRAIN = {s:'mar', g:'tierra', w:'río'};
+
+Object.entries(BLOCKS).forEach(([id,b]) => {
+  const el = document.createElement('button');
+  el.className = 'chip'; el.dataset.id = id; el.id = 'chip-'+id;
+  el.innerHTML = `${brickHTML(b.color,b.icon)}<span class="name">${b.name}</span><span class="price">🪙 ${b.price}</span><span class="where">${b.where==='water'?'va en el río':'va en la tierra'}</span>`;
+  el.addEventListener('click', () => { S.sel = id; tone(660,.05); renderPalette(); showTip(`${b.name}: cuesta ${b.price} ${b.price===1?'moneda':'monedas'}. Tócalo en ${b.where==='water'?'el río (azul claro)':'la tierra (verde)'}.`); });
+  paletteEl.appendChild(el);
+});
+
+function startBuild(){
+  S.grid = MAP.join('').split('').map(t => ({t, b:null}));
+  S.left = S.budget; S.time = 300; S.sel = null; S.solvedOnce = false;
+  $('#coins-total').textContent = S.budget;
+  $('#m-icon').textContent = S.problem.icon; $('#m-field').textContent = S.problem.field; $('#m-title').textContent = S.problem.title;
+  gridEl.innerHTML = '';
+  S.grid.forEach((c,i) => {
+    const el = document.createElement('button');
+    el.className = 'tile '+c.t;
+    el.setAttribute('aria-label', `Fila ${Math.floor(i/COLS)+1}, columna ${i%COLS+1}: ${TERRAIN[c.t]}`);
+    if (c.t === 's') { el.disabled = true; el.tabIndex = -1; }
+    el.addEventListener('click', () => tapTile(i));
+    gridEl.appendChild(el);
+  });
+  showTip('Elige un bloque abajo y toca la isla para ponerlo. Toca un bloque puesto para quitarlo.');
+  go('build');
+  renderAll();
+  S.timer = setInterval(() => { S.time--; renderTimer(); if (S.time <= 0) finish(true); }, 1000);
+}
+function stopBuildTimer(){ clearInterval(S.timer); S.timer = null; }
+
+function tapTile(i){
+  const c = S.grid[i]; if (c.t === 's') return;
+  if (c.b) { S.left += BLOCKS[c.b].price; showTip(`Quitaste ${BLOCKS[c.b].name.toLowerCase()}. Te devolvieron ${BLOCKS[c.b].price} 🪙.`); c.b = null; tone(260,.08); renderAll(); return; }
+  if (!S.sel) { showTip('Primero elige un bloque de la fila de abajo.'); return; }
+  const b = BLOCKS[S.sel];
+  if ((b.where === 'water') !== (c.t === 'w')) { showTip(b.where==='water' ? `${b.name} va en el río (azul claro).` : `${b.name} va en la tierra (verde), no en el agua.`); tone(180,.12,'sawtooth'); return; }
+  if (b.price > S.left) { showTip('¡No te alcanzan las monedas! Quita algo o elige un bloque más barato.'); tone(150,.18,'sawtooth'); const coins=$('#coins'); coins.classList.remove('shake'); void coins.offsetWidth; coins.classList.add('shake'); return; }
+  c.b = S.sel; S.left -= b.price; tone(880,.06); tone(1320,.05,'square',.05);
+  renderAll();
+}
+
+function renderAll(){
+  S.grid.forEach((c,i) => {
+    const el = gridEl.children[i]; const want = c.b || '';
+    if (el.dataset.b !== want) { el.dataset.b = want; el.innerHTML = c.b ? brickHTML(BLOCKS[c.b].color, BLOCKS[c.b].icon) : ''; }
+  });
+  renderPalette(); renderTimer();
+  $('#coins-left').textContent = S.left;
+  const reqs = S.problem.check();
+  $('#checklist').innerHTML = reqs.map(r => `<li class="${r.ok?'ok':''}">${r.t}</li>`).join('');
+  const solved = reqs.every(r => r.ok);
+  $('#btn-done').classList.toggle('ready', solved);
+  if (solved && !S.solvedOnce) { S.solvedOnce = true; showTip('¡Misión cumplida! Puedes decorar tu isla o tocar “¡Terminé!”.'); [660,880,1100].forEach((f,k)=>tone(f,.1,'triangle',k*.09)); }
+  if (!solved) S.solvedOnce = false;
+}
+function renderPalette(){
+  [...paletteEl.children].forEach(el => { el.classList.toggle('sel', el.dataset.id === S.sel); el.classList.toggle('cant', BLOCKS[el.dataset.id].price > S.left); });
+  S.grid.length && S.grid.forEach((c,i) => gridEl.children[i] && gridEl.children[i].classList.toggle('hint-ok', !!S.sel && !c.b && c.t !== 's' && (BLOCKS[S.sel].where==='water') === (c.t==='w')));
+}
+function renderTimer(){ const t=$('#timer'); t.textContent = '⏱ '+fmt(Math.max(0,S.time)); t.classList.toggle('low', S.time <= 30); }
+function showTip(text){ tipEl.textContent = text; }
+
+$('#btn-done').addEventListener('click', () => finish(false));
+$('#btn-exit-build').addEventListener('click', () => go('home'));
+
+/* Result */
+const STAR = '<svg class="star{on}" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" stroke="#1d2433" stroke-width="1.2" d="M12 2.5l2.9 6 6.6.8-4.9 4.6 1.3 6.5L12 17.2l-5.9 3.2 1.3-6.5L2.5 9.3l6.6-.8z"/></svg>';
+function finish(timeout){
+  stopBuildTimer();
+  const reqs = S.problem.check(), solved = reqs.every(r => r.ok);
+  const stars = [solved, !timeout, S.left >= 2];
+  $('#stars').innerHTML = stars.map(on => STAR.replace('{on}', on?' on':'')).join('');
+  $('#stars').setAttribute('aria-label', `${stars.filter(Boolean).length} de 3 estrellas`);
+  $('#res-title').textContent = solved ? '¡Isla salvada!' : (timeout ? '¡Se acabó el tiempo!' : '¡Casi lo logras!');
+  const spent = S.budget - S.left;
+  $('#res-sub').textContent = `Gastaste ${spent} de ${S.budget} monedas y te ${S.left===1?'sobró 1 moneda':`sobraron ${S.left} monedas`}.` + (solved ? '' : ' Revisa lo que faltó:');
+  $('#res-list').innerHTML = reqs.map(r => `<li class="${r.ok?'ok':'no'}">${r.t}</li>`).join('');
+  $('#res-field').textContent = S.problem.field;
+  $('#res-about').textContent = S.problem.about;
+  go('result');
+  if (solved) { celebrate(); [523,659,784,1047].forEach((f,k)=>tone(f,.16,'triangle',k*.12)); }
+  else { tone(330,.15,'triangle'); tone(262,.25,'triangle',.15); }
+}
+function celebrate(){
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const box = $('#confetti'), colors = ['#e3342f','#ffcd1f','#1f6fd1','#2e9e44','#f08a24','#ffffff'];
+  box.innerHTML = Array.from({length:36}, () => `<i style="left:${Math.random()*100}%;background:${colors[Math.floor(Math.random()*colors.length)]};animation-duration:${1.8+Math.random()*1.6}s;animation-delay:${Math.random()*.6}s"></i>`).join('');
+  setTimeout(() => box.innerHTML = '', 4200);
+}
+$('#btn-retry').addEventListener('click', startBuild);
+$('#btn-new').addEventListener('click', () => go('draw'));
+
+/* Real Lego mode */
+const L = {problem:null, budget:null, counts:{}, time:300, timer:null};
+const ldeckP = $('#ldeck-p'), ldeckB = $('#ldeck-b');
+function newLegoCards(){
+  L.problem = pick(PROBLEMS, L.problem); L.budget = pick(LEGO_BUDGETS);
+  ldeckP.classList.remove('flipped'); ldeckB.classList.remove('flipped');
+  $('#lego-goal').hidden = true;
+  setTimeout(() => { $('#lfront-p').innerHTML = problemFront(L.problem); $('#lfront-b').innerHTML = budgetFront(L.budget.amt, L.budget); $('#lego-goal-text').textContent = L.problem.lego; }, 250);
+  L.counts = {}; renderPrices(); resetLego();
+}
+setupDeck(ldeckP, () => { $('#lego-goal').hidden = false; });
+setupDeck(ldeckB, renderPrices);
+
+const pricesEl = $('#prices');
+pricesEl.innerHTML = LEGO_PRICES.map(p => `<div class="price-row">${brickHTML(p.color)}<div class="txt"><b>${p.name} <span class="pricetag">🪙 ${p.price}</span></b><span>${p.desc}</span></div>
+  <div class="stepper"><button data-d="-1" data-id="${p.id}" aria-label="Quitar ${p.name}">−</button><output id="cnt-${p.id}">0</output><button data-d="1" data-id="${p.id}" aria-label="Agregar ${p.name}">+</button></div></div>`).join('');
+pricesEl.addEventListener('click', e => {
+  const b = e.target.closest('button[data-id]'); if (!b) return;
+  const id = b.dataset.id; L.counts[id] = Math.max(0, (L.counts[id]||0) + Number(b.dataset.d));
+  tone(b.dataset.d === '1' ? 880 : 300, .05); renderPrices();
+});
+function renderPrices(){
+  let spent = 0;
+  LEGO_PRICES.forEach(p => { const n = L.counts[p.id]||0; spent += n*p.price; $('#cnt-'+p.id).textContent = n; });
+  $('#l-spent').textContent = spent;
+  const left = $('#l-left');
+  if (!ldeckB.classList.contains('flipped')) { left.textContent = 'Saquen la carta de presupuesto'; left.className = ''; return; }
+  const rest = L.budget.amt - spent;
+  left.textContent = rest >= 0 ? `Quedan ${rest} de ${L.budget.amt} 🪙` : `¡Se pasaron por ${-rest} 🪙!`;
+  left.className = rest >= 0 ? '' : 'over';
+}
+
+function renderLegoTimer(){ const t=$('#ltimer'); t.textContent = fmt(L.time); t.classList.toggle('low', L.time <= 30); }
+function pauseLego(){ clearInterval(L.timer); L.timer = null; $('#lt-start').textContent = L.time < 300 && L.time > 0 ? 'Seguir' : 'Empezar'; }
+function resetLego(){ pauseLego(); L.time = 300; $('#lt-start').textContent = 'Empezar'; renderLegoTimer(); }
+$('#lt-start').addEventListener('click', () => {
+  if (L.timer) { pauseLego(); return; }
+  if (L.time <= 0) L.time = 300;
+  tone(660,.1,'triangle');
+  $('#lt-start').textContent = 'Pausar';
+  L.timer = setInterval(() => { L.time--; renderLegoTimer();
+    if (L.time <= 0) { pauseLego(); $('#lt-start').textContent = 'Otra vez'; [784,659,523].forEach((f,k)=>tone(f,.2,'triangle',k*.18)); } }, 1000);
+});
+$('#lt-reset').addEventListener('click', resetLego);
+$('#btn-lnew').addEventListener('click', newLegoCards);
+})();
+</script>
