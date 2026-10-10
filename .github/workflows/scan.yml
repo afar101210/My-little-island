@@ -1,0 +1,31 @@
+name: Escaner crash 10/10
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [crash-1010-scan]
+    paths: ["crash_1010_scan.py", ".github/workflows/scan.yml"]
+
+permissions:
+  contents: write
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install requests
+      - run: python crash_1010_scan.py
+      - name: Resumen en la pagina del run
+        run: cat resultados.md >> "$GITHUB_STEP_SUMMARY"
+      - name: Guardar resultados en el repo
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898283+github-actions[bot]@users.noreply.github.com"
+          git add resultados.md crash_1010_resultados.csv
+          git diff --cached --quiet || git commit -m "Resultados del escaner [skip ci]"
+          git push
